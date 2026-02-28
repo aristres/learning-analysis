@@ -4,6 +4,7 @@ const pages = [
   { href: '/demo/dashboard', title: 'ダッシュボード', desc: '子ども一覧・診断履歴・料金プラン表示' },
   { href: '/demo/assessment/basic', title: 'ベーシック診断（20問）', desc: '有料20問フォーム・子ども選択付き' },
   { href: '/demo/report', title: '学習特性レポート', desc: '8領域スコア・強み/弱み・手立て・学習スタイル' },
+  { href: '/demo/plan', title: '30日プラン', desc: '月別の手立て選出・週別メニュー・自動調整ルール' },
   { href: '/demo/growth-report', title: '成長レポート', desc: '月別スコア推移・完了率トレンド・効果的な手立てランキング' },
   { href: '/demo/child/daily-log', title: '日次ログ（子どもUI）', desc: '絵文字つき10問・スライド形式の子ども向けフォーム' },
   { href: '/demo/child/self-discovery', title: '学び発見（子どもUI）', desc: '子ども自身が学び方を知る8問の自己診断・マイレポート' },

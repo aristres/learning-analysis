@@ -183,18 +183,88 @@ export interface AssessmentResult {
 }
 
 // =============================================
-// 30日プラン
+// 手立てマスターデータ型
 // =============================================
 
-export interface WeekMenu {
-  week: number    // 1〜4
+export type StrategyCategory =
+  | 'kanji'
+  | 'math'
+  | 'attention'
+  | 'working_memory'
+  | 'processing_speed'
+  | 'motivation_emotion'
+  | 'study_habits'
+  | 'sensory'
+
+export type LearningStyle = 'visual' | 'auditory' | 'kinesthetic'
+
+export type DomainKey = keyof AnswersJson['domains']
+
+export interface Strategy {
+  id: string
+  category: StrategyCategory
+  label: string
+  description: string
+  target_domains: DomainKey[]
+  learning_style: LearningStyle[]
+  difficulty: 1 | 2 | 3
+  prerequisite: string | null
+  next_step: string | null
+  measurable_by: (keyof DailyLogAnswers)[]
+}
+
+// =============================================
+// 30日プラン（拡張版）
+// =============================================
+
+export interface StrategySelection {
+  id: string
+  label: string
+  description: string
+  reason: string
+  measurable_by: (keyof DailyLogAnswers)[]
+}
+
+export interface DailyTask {
+  category: StrategyCategory
+  strategy_id: string
+  task: string
+  duration_minutes: number
+}
+
+export interface WeekPlan {
+  week: number
   theme: string
-  daily_tasks: string[]
+  focus_domain: DomainKey
+  daily_tasks: DailyTask[]
+  success_criteria: string
+}
+
+export interface AdjustmentRule {
+  trigger: string
+  action: string
 }
 
 export interface PlanJson {
   overview: string
-  weeks: WeekMenu[]
+  month: number
+  child_profile: {
+    learning_style: LearningStyle
+    low_domains: DomainKey[]
+    improving_domains: DomainKey[]
+  }
+  continued_strategies: StrategySelection[]
+  new_strategies: StrategySelection[]
+  retired_strategies: { id: string; reason: string }[]
+  weeks: WeekPlan[]
+  adjustment_rules: AdjustmentRule[]
+}
+
+// 後方互換: シンプルな週メニュー（デモ等で使用）
+export interface WeekMenu {
+  week: number
+  theme: string
+  daily_tasks: string[]
 }
 
 // =============================================

@@ -58,6 +58,12 @@ export default function DemoDashboard() {
                     レポートを見る
                   </Link>
                   <Link
+                    href="/demo/plan"
+                    className="text-center text-sm py-1.5 border border-[#F7941D] text-[#F7941D] rounded-lg hover:bg-[#FFF8F0]"
+                  >
+                    📋 30日プラン
+                  </Link>
+                  <Link
                     href="/demo/growth-report"
                     className="text-center text-sm py-1.5 border border-[#43A047] text-[#43A047] rounded-lg hover:bg-green-50"
                   >
@@ -65,7 +71,7 @@ export default function DemoDashboard() {
                   </Link>
                   <Link
                     href="/demo/child/self-discovery"
-                    className="text-center text-sm py-1.5 border border-[#2196F3] text-[#2196F3] rounded-lg hover:bg-blue-50"
+                    className="text-center text-sm py-1.5 border border-[#2196F3] text-[#2196F3] rounded-lg hover:bg-blue-50 col-span-2"
                   >
                     🔍 学び発見
                   </Link>
