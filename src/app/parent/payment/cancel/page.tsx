@@ -12,7 +12,7 @@ export default function PaymentCancelPage() {
         </p>
         <Link
           href="/parent/dashboard"
-          className="inline-block px-8 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700"
+          className="inline-block px-8 py-3 bg-[#F7941D] text-white rounded-lg font-medium hover:bg-[#E8850F] transition"
         >
           ダッシュボードに戻る
         </Link>

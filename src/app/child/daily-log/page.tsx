@@ -220,18 +220,18 @@ export default function DailyLogPage() {
 
   if (step === 'loading') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-indigo-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-indigo-500 mb-4" />
-        <p className="text-indigo-600 font-medium text-lg">よみこみちゅう...</p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#FFF8F0]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-[#F7941D] mb-4" />
+        <p className="text-[#F7941D] font-medium text-lg">よみこみちゅう...</p>
       </div>
     )
   }
 
   if (step === 'already_done') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-indigo-50 px-4 text-center">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#FFF8F0] px-4 text-center">
         <div className="text-6xl mb-4">🌟</div>
-        <h1 className="text-3xl font-bold text-indigo-700 mb-2">
+        <h1 className="text-3xl font-bold text-[#1B2A4A] mb-2">
           きょうはもうかいとうしたよ！
         </h1>
         <p className="text-gray-500 text-lg">またあしたね</p>
@@ -241,9 +241,9 @@ export default function DailyLogPage() {
 
   if (step === 'done') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-indigo-50 px-4 text-center">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#FFF8F0] px-4 text-center">
         <div className="text-6xl mb-4">🎉</div>
-        <h1 className="text-3xl font-bold text-indigo-700 mb-2">
+        <h1 className="text-3xl font-bold text-[#1B2A4A] mb-2">
           おつかれさま！
         </h1>
         <p className="text-xl text-gray-600 mb-2">きょうもよくがんばったね</p>
@@ -253,11 +253,11 @@ export default function DailyLogPage() {
   }
 
   return (
-    <div className="min-h-screen bg-indigo-50 flex flex-col">
+    <div className="min-h-screen bg-[#FFF8F0] flex flex-col">
       {/* プログレスバー */}
-      <div className="h-2 bg-indigo-100">
+      <div className="h-2 bg-orange-100">
         <div
-          className="h-2 bg-indigo-500 transition-all duration-300"
+          className="h-2 bg-[#F7941D] transition-all duration-300"
           style={{ width: `${progress}%` }}
         />
       </div>
@@ -265,7 +265,7 @@ export default function DailyLogPage() {
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-10">
         <div className="w-full max-w-md">
           {/* 問番号 */}
-          <p className="text-center text-indigo-400 text-sm font-medium mb-4">
+          <p className="text-center text-[#F7941D] text-sm font-medium mb-4">
             {currentQ + 1} / {QUESTIONS.length}
           </p>
 
@@ -286,7 +286,7 @@ export default function DailyLogPage() {
                 className={`w-full py-4 px-5 text-xl font-medium rounded-2xl border-2 transition active:scale-95 ${
                   q.type === 'scale'
                     ? (opt as { color: string }).color
-                    : 'bg-white border-gray-200 hover:border-indigo-400 hover:bg-indigo-50'
+                    : 'bg-white border-gray-200 hover:border-[#F7941D] hover:bg-[#FFF8F0]'
                 }`}
               >
                 {opt.label}

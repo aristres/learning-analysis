@@ -57,6 +57,13 @@ export default async function ReportPage({
 
   const child = assessment.children as { name: string; grade: string } | null
 
+  // この診断に紐づくプランがあるか確認
+  const { data: linkedPlan } = await supabase
+    .from('plans')
+    .select('id')
+    .eq('assessment_id', assessmentId)
+    .single()
+
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-4">
       <div className="max-w-2xl mx-auto space-y-6">
@@ -209,6 +216,19 @@ export default async function ReportPage({
           </h2>
           <p className="text-gray-700">{result.study_style.description}</p>
         </div>
+
+        {/* プランCTA */}
+        {linkedPlan && (
+          <div className="bg-gradient-to-br from-[#1B2A4A] to-[#2C3E6B] rounded-xl p-6 text-center text-white">
+            <p className="text-white/80 mb-2">この診断に基づく学習プランが生成されています</p>
+            <Link
+              href={`/parent/plan/${linkedPlan.id}`}
+              className="inline-block px-8 py-3 bg-[#F7941D] text-white rounded-lg font-medium hover:bg-[#E8850F] transition"
+            >
+              📋 30日プランを見る
+            </Link>
+          </div>
+        )}
 
         {/* CTA */}
         {assessment.type === 'free' && (

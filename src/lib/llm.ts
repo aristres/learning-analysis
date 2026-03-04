@@ -1,9 +1,38 @@
-import Anthropic from '@anthropic-ai/sdk'
+import OpenAI from 'openai'
 import type { AnswersJson, AssessmentResult } from '@/types'
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY!,
+  timeout: 60_000, // 60秒タイムアウト
+  maxRetries: 2,   // 自動リトライ2回
 })
+
+// =============================================
+// リトライヘルパー（アプリケーションレベル）
+// =============================================
+
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  maxRetries = 2,
+  delayMs = 1000
+): Promise<T> {
+  let lastError: Error | null = null
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn()
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error))
+      console.error(`LLM attempt ${attempt + 1}/${maxRetries + 1} failed:`, lastError.message)
+
+      if (attempt < maxRetries) {
+        // 指数バックオフ
+        const delay = delayMs * Math.pow(2, attempt)
+        await new Promise((resolve) => setTimeout(resolve, delay))
+      }
+    }
+  }
+  throw lastError
+}
 
 // =============================================
 // ベーシック診断レポート生成
@@ -14,30 +43,37 @@ export async function generateAssessmentReport(
 ): Promise<AssessmentResult> {
   const prompt = buildAssessmentPrompt(answersJson)
 
-  const message = await anthropic.messages.create({
-    model: 'claude-opus-4-6',
-    max_tokens: 2048,
-    messages: [
-      {
-        role: 'user',
-        content: prompt,
-      },
-    ],
+  return withRetry(async () => {
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      max_tokens: 2048,
+      response_format: { type: 'json_object' },
+      messages: [
+        {
+          role: 'system',
+          content: 'あなたは小学生〜中学生の学習特性に詳しい専門家です。必ず指定されたJSON形式で回答してください。',
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+    })
+
+    const content = completion.choices[0]?.message?.content
+    if (!content) {
+      throw new Error('LLM returned empty content')
+    }
+
+    const result: AssessmentResult = JSON.parse(content)
+
+    // 必須フィールドの簡易バリデーション
+    if (!result.summary || !result.strengths || !result.weaknesses) {
+      throw new Error('LLM response missing required fields')
+    }
+
+    return result
   })
-
-  const content = message.content[0]
-  if (content.type !== 'text') {
-    throw new Error('LLM returned non-text content')
-  }
-
-  // JSONブロックを抽出してパース
-  const jsonMatch = content.text.match(/\{[\s\S]*\}/)
-  if (!jsonMatch) {
-    throw new Error('LLM response does not contain valid JSON')
-  }
-
-  const result: AssessmentResult = JSON.parse(jsonMatch[0])
-  return result
 }
 
 // =============================================
@@ -49,28 +85,36 @@ export async function generateFreeReport(
 ): Promise<Pick<AssessmentResult, 'summary' | 'strengths' | 'home_strategies'>> {
   const prompt = buildFreePrompt(answersJson)
 
-  const message = await anthropic.messages.create({
-    model: 'claude-opus-4-6',
-    max_tokens: 1024,
-    messages: [
-      {
-        role: 'user',
-        content: prompt,
-      },
-    ],
+  return withRetry(async () => {
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      max_tokens: 1024,
+      response_format: { type: 'json_object' },
+      messages: [
+        {
+          role: 'system',
+          content: 'あなたは子どもの学習特性に詳しい専門家です。必ず指定されたJSON形式で回答してください。',
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+    })
+
+    const content = completion.choices[0]?.message?.content
+    if (!content) {
+      throw new Error('LLM returned empty content')
+    }
+
+    const result = JSON.parse(content)
+
+    if (!result.summary || !result.strengths) {
+      throw new Error('LLM response missing required fields')
+    }
+
+    return result
   })
-
-  const content = message.content[0]
-  if (content.type !== 'text') {
-    throw new Error('LLM returned non-text content')
-  }
-
-  const jsonMatch = content.text.match(/\{[\s\S]*\}/)
-  if (!jsonMatch) {
-    throw new Error('LLM response does not contain valid JSON')
-  }
-
-  return JSON.parse(jsonMatch[0])
 }
 
 // =============================================
@@ -78,8 +122,7 @@ export async function generateFreeReport(
 // =============================================
 
 function buildAssessmentPrompt(answersJson: AnswersJson): string {
-  return `あなたは小学生〜中学生の学習特性に詳しい専門家です。
-教育心理・認知特性・特別支援・家庭学習支援の観点から、
+  return `教育心理・認知特性・特別支援・家庭学習支援の観点から、
 親が回答した質問データをもとに、学習特性レポートを作成してください。
 
 以下の制約を守ってください。
@@ -172,8 +215,7 @@ function buildFreePrompt(answersJson: Partial<AnswersJson>): string {
         .join(', ')
     : 'なし'
 
-  return `あなたは子どもの学習特性に詳しい専門家です。
-以下の簡易診断データをもとに、親向けの「お試しレポート」を作成してください。
+  return `以下の簡易診断データをもとに、親向けの「お試しレポート」を作成してください。
 
 【重要】
 - 医療診断に相当する表現は禁止

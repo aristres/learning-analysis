@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import Image from 'next/image'
 import Header from '@/components/Header'
 
 export default function HomePage() {
@@ -10,14 +9,9 @@ export default function HomePage() {
       {/* Hero */}
       <section className="relative bg-gradient-to-br from-[#1B2A4A] to-[#2C3E6B] text-white">
         <div className="max-w-5xl mx-auto px-4 py-20 md:py-28 text-center">
-          <Image
-            src="/logo.png"
-            alt="KIDDO Insight"
-            width={280}
-            height={80}
-            className="mx-auto mb-8 h-16 md:h-20 w-auto brightness-0 invert"
-            priority
-          />
+          <div className="mx-auto mb-8 text-3xl md:text-4xl font-bold">
+            <span className="text-[#F7941D]">KIDDO</span> Insight
+          </div>
           <h1 className="text-3xl md:text-5xl font-bold mb-4 leading-tight">
             お子さんの<br className="sm:hidden" />
             <span className="text-[#F7941D]">&ldquo;学び方の個性&rdquo;</span>を<br className="sm:hidden" />
@@ -238,6 +232,17 @@ export default function HomePage() {
       <footer className="bg-[#1B2A4A] text-white/60 text-sm text-center py-8">
         <p className="font-medium text-white/80 mb-1">KIDDO Insight</p>
         <p>&copy; 2025 KIDDO Insight</p>
+        <div className="flex items-center justify-center gap-4 mt-3 flex-wrap">
+          <Link href="/privacy" className="text-white/40 hover:text-white/70 text-xs">
+            プライバシーポリシー
+          </Link>
+          <Link href="/terms" className="text-white/40 hover:text-white/70 text-xs">
+            利用規約
+          </Link>
+          <Link href="/tokushoho" className="text-white/40 hover:text-white/70 text-xs">
+            特定商取引法に基づく表記
+          </Link>
+        </div>
         <Link href="/demo" className="text-white/40 hover:text-white/70 text-xs mt-2 inline-block">
           デモページを見る
         </Link>

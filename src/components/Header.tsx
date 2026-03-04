@@ -1,21 +1,15 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 
 export default function Header() {
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
-          <Image
-            src="/logo.png"
-            alt="KIDDO Insight"
-            width={180}
-            height={48}
-            className="h-10 w-auto"
-            priority
-          />
+          <span className="text-xl font-bold text-[#1B2A4A]">
+            <span className="text-[#F7941D]">KIDDO</span> Insight
+          </span>
         </Link>
         <nav className="flex items-center gap-4">
           <Link

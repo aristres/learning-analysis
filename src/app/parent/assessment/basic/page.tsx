@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
@@ -56,6 +56,14 @@ const QUESTION_STEPS: QuestionStep[] = [
 const TOTAL_QUESTIONS = QUESTION_STEPS.length
 
 export default function BasicAssessmentPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><p className="text-gray-400">読み込み中...</p></div>}>
+      <BasicAssessmentContent />
+    </Suspense>
+  )
+}
+
+function BasicAssessmentContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const assessmentId = searchParams.get('assessmentId')

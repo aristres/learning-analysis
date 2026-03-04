@@ -45,6 +45,7 @@ export async function updateSession(request: NextRequest) {
     '/parent/children',
     '/parent/report',
     '/parent/payment',
+    '/parent/plan',
     '/child',
     '/api/assessment/basic',
     '/api/plan',

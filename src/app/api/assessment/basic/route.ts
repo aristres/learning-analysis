@@ -2,6 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { calcBasicAnswersJson } from '@/lib/scoring'
 import { generateAssessmentReport } from '@/lib/llm'
+import { generatePlan } from '@/lib/plan-generator'
+import type { AnswersJson, LearningStyle } from '@/types'
+
+function determineLearningStyle(answersJson: AnswersJson): LearningStyle {
+  const sensoryScore = answersJson.domains.sensory?.score ?? 50
+  const rawQ19 = answersJson.raw_scores?.Q19 as number | undefined
+  if (sensoryScore >= 65 && rawQ19 === 3) return 'visual'
+  if (sensoryScore < 40) return 'kinesthetic'
+  return 'auditory'
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -70,8 +80,22 @@ export async function POST(request: NextRequest) {
         .eq('id', currentAssessmentId)
     }
 
-    // LLM でレポート生成
-    const report = await generateAssessmentReport(answersJson)
+    // LLM でレポート生成（エラー時はフォールバック）
+    let report
+    try {
+      report = await generateAssessmentReport(answersJson)
+    } catch (llmErr) {
+      console.error('LLM report generation failed:', llmErr)
+      // エラー状態を保存
+      await supabase
+        .from('assessments')
+        .update({ status: 'error', answers_json: answersJson })
+        .eq('id', currentAssessmentId)
+      return NextResponse.json(
+        { error: 'レポート生成に失敗しました。もう一度お試しください。' },
+        { status: 503 }
+      )
+    }
 
     // 結果保存
     await supabase
@@ -83,10 +107,58 @@ export async function POST(request: NextRequest) {
       })
       .eq('id', currentAssessmentId)
 
+    // 支払い済みの場合は自動で30日プラン生成
+    let planId: string | null = null
+    if (assessmentId) {
+      // assessmentId がある = 支払いフロー経由
+      try {
+        const { data: child } = await supabase
+          .from('children')
+          .select('name')
+          .eq('id', childId)
+          .single()
+
+        const learningStyle = determineLearningStyle(answersJson)
+        const planJson = generatePlan({
+          domains: answersJson.domains,
+          learningStyle,
+          month: 1,
+          effectiveStrategyIds: [],
+          ineffectiveStrategyIds: [],
+          previousStrategyIds: [],
+          childName: child?.name ?? '',
+        })
+
+        const endDate = new Date()
+        endDate.setDate(endDate.getDate() + 30)
+
+        const { data: plan } = await supabase
+          .from('plans')
+          .insert({
+            child_id: childId,
+            parent_id: user.id,
+            assessment_id: currentAssessmentId,
+            type: '30day',
+            status: 'active',
+            plan_json: planJson,
+            start_date: new Date().toISOString().split('T')[0],
+            end_date: endDate.toISOString().split('T')[0],
+          })
+          .select('id')
+          .single()
+
+        planId = plan?.id ?? null
+      } catch (planErr) {
+        // プラン生成失敗はレポートには影響しない
+        console.error('Auto plan generation failed:', planErr)
+      }
+    }
+
     return NextResponse.json({
       assessmentId: currentAssessmentId,
       result: report,
       answersJson,
+      planId,
     })
   } catch (err) {
     console.error('Basic assessment error:', err)

@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import type { DbChild, DbAssessment } from '@/types'
+import type { DbChild, DbAssessment, DbPlan } from '@/types'
 
 export default async function ParentDashboard() {
   const supabase = await createClient()
@@ -24,6 +24,14 @@ export default async function ParentDashboard() {
     .eq('status', 'completed')
     .order('created_at', { ascending: false })
     .limit(5)
+
+  // アクティブプラン
+  const { data: plans } = await supabase
+    .from('plans')
+    .select('*, children(name)')
+    .eq('parent_id', user.id)
+    .eq('status', 'active')
+    .order('created_at', { ascending: false })
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -134,6 +142,36 @@ export default async function ParentDashboard() {
             </div>
           </div>
         </section>
+
+        {/* アクティブプラン */}
+        {plans && plans.length > 0 && (
+          <section>
+            <h3 className="text-lg font-bold text-gray-700 mb-3">📋 アクティブプラン</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {(plans as (DbPlan & { children: { name: string } | null })[]).map((p) => (
+                <Link
+                  key={p.id}
+                  href={`/parent/plan/${p.id}`}
+                  className="bg-white rounded-xl shadow-sm p-5 border hover:border-[#F7941D] transition"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="font-bold text-gray-800">
+                      {p.children?.name ?? '—'}の30日プラン
+                    </p>
+                    <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full">
+                      実施中
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    {p.start_date && new Date(p.start_date).toLocaleDateString('ja-JP')} 〜{' '}
+                    {p.end_date && new Date(p.end_date).toLocaleDateString('ja-JP')}
+                  </p>
+                  <p className="text-[#F7941D] text-sm mt-2">プランを見る →</p>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* 直近の診断結果 */}
         {assessments && assessments.length > 0 && (
