@@ -199,3 +199,6 @@ CREATE INDEX idx_assessments_parent_id ON public.assessments(parent_id);
 CREATE INDEX idx_daily_logs_child_date ON public.daily_logs(child_id, log_date);
 CREATE INDEX idx_subscriptions_user_id ON public.subscriptions(user_id);
 CREATE INDEX idx_subscriptions_stripe_customer ON public.subscriptions(stripe_customer_id);
+CREATE INDEX idx_plans_child_id ON public.plans(child_id);
+CREATE INDEX idx_plans_parent_id ON public.plans(parent_id);
+CREATE INDEX idx_plans_assessment_id ON public.plans(assessment_id);
