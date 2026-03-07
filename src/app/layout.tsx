@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import { Noto_Sans_JP } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import './globals.css'
 
 const notoSansJP = Noto_Sans_JP({
@@ -58,6 +60,8 @@ export default function RootLayout({
     <html lang="ja">
       <body className={`${notoSansJP.variable} font-sans antialiased bg-gray-50 text-gray-900`}>
         {children}
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )
