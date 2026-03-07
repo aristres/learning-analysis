@@ -12,6 +12,7 @@ export default function SignupPage() {
   const [displayName, setDisplayName] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [signupSuccess, setSignupSuccess] = useState(false)
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -23,6 +24,7 @@ export default function SignupPage() {
       email,
       password,
       options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
         data: {
           role: 'parent',
           display_name: displayName,
@@ -36,7 +38,35 @@ export default function SignupPage() {
       return
     }
 
-    router.push('/parent/dashboard')
+    setSignupSuccess(true)
+    setLoading(false)
+  }
+
+  if (signupSuccess) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] px-4">
+        <div className="w-full max-w-md bg-white rounded-2xl shadow-md p-8 text-center">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold text-[#1B2A4A] mb-2">確認メールを送信しました</h1>
+          <p className="text-gray-600 mb-4">
+            <span className="font-medium text-[#1B2A4A]">{email}</span> に確認メールを送信しました。
+          </p>
+          <p className="text-gray-500 text-sm mb-6">
+            メール内のリンクをクリックして、アカウントを有効化してください。
+          </p>
+          <Link
+            href="/login"
+            className="inline-block px-6 py-3 bg-[#F7941D] text-white rounded-lg font-medium hover:bg-[#E8850F] transition"
+          >
+            ログインページへ
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   return (
