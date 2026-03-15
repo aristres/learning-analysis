@@ -25,6 +25,15 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
+  // IMPORTANT: Must call getUser() on every request to refresh session tokens
+  let user = null
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  } catch {
+    // Supabase接続エラー時はスキップ
+  }
+
   // 認証不要の公開パス
   const publicPaths = [
     '/parent/assessment/free',
@@ -58,14 +67,6 @@ export async function updateSession(request: NextRequest) {
 
   if (!isProtected) {
     return supabaseResponse
-  }
-
-  let user = null
-  try {
-    const { data } = await supabase.auth.getUser()
-    user = data.user
-  } catch {
-    // Supabase接続エラー時はスキップ
   }
 
   if (!user) {
