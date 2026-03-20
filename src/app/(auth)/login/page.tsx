@@ -44,6 +44,8 @@ function LoginForm() {
       .eq('id', data.user.id)
       .single()
 
+    // サーバーコンポーネントのキャッシュを更新してからリダイレクト
+    router.refresh()
     if (userData?.role === 'child') {
       router.push('/child/daily-log')
     } else {
