@@ -10,7 +10,7 @@ export default function HomePage() {
       <section className="relative bg-gradient-to-br from-[#1B2A4A] to-[#2C3E6B] text-white">
         <div className="max-w-5xl mx-auto px-4 py-20 md:py-28 text-center">
           <div className="mx-auto mb-8 text-3xl md:text-4xl font-bold">
-            <span className="text-[#F7941D]">KIDDO</span> Insight
+            🧭 <span className="text-[#F7941D]">まなび</span>コンパス
           </div>
           <h1 className="text-3xl md:text-5xl font-bold mb-4 leading-tight">
             お子さんの<br className="sm:hidden" />
@@ -230,8 +230,8 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer className="bg-[#1B2A4A] text-white/60 text-sm text-center py-8">
-        <p className="font-medium text-white/80 mb-1">KIDDO Insight</p>
-        <p>&copy; 2025 KIDDO Insight</p>
+        <p className="font-medium text-white/80 mb-1">まなびコンパス</p>
+        <p>&copy; 2025 まなびコンパス</p>
         <div className="flex items-center justify-center gap-4 mt-3 flex-wrap">
           <Link href="/privacy" className="text-white/40 hover:text-white/70 text-xs">
             プライバシーポリシー

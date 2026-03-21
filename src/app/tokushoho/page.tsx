@@ -2,7 +2,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: '特定商取引法に基づく表記 | KIDDO Insight',
+  title: '特定商取引法に基づく表記 | まなびコンパス',
 }
 
 export default function TokushohoPage() {
@@ -15,7 +15,7 @@ export default function TokushohoPage() {
           <div className="space-y-4">
             <div className="border-b border-gray-100 pb-4">
               <h2 className="text-sm font-medium text-gray-500 mb-1">販売業者</h2>
-              <p className="text-gray-800">KIDDO Insight 運営事務局</p>
+              <p className="text-gray-800">まなびコンパス 運営事務局</p>
             </div>
 
             <div className="border-b border-gray-100 pb-4">

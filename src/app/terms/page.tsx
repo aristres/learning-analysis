@@ -2,7 +2,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: '利用規約 | KIDDO Insight',
+  title: '利用規約 | まなびコンパス',
 }
 
 export default function TermsPage() {
@@ -17,7 +17,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-lg font-bold text-[#1B2A4A] mb-2">第1条（適用）</h2>
               <p className="text-gray-700 leading-relaxed">
-                本規約は、KIDDO Insight（以下「当サービス」）の利用に関する条件を定めるものです。
+                本規約は、まなびコンパス（以下「当サービス」）の利用に関する条件を定めるものです。
                 ユーザーは、本規約に同意の上で当サービスをご利用ください。
               </p>
             </section>

@@ -38,7 +38,7 @@ export default async function ParentDashboard() {
       {/* ナビ */}
       <header className="bg-white border-b px-4 py-3">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <h1 className="text-xl font-bold text-[#1B2A4A]">KIDDO Insight</h1>
+          <h1 className="text-xl font-bold text-[#1B2A4A]">🧭 まなびコンパス</h1>
           <form action="/api/auth/signout" method="post">
             <button className="text-sm text-gray-500 hover:text-gray-700">ログアウト</button>
           </form>
