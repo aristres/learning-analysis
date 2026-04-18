@@ -10,7 +10,7 @@ export default async function PaymentSuccessPage({
 
   const message =
     productType === 'basic_assessment'
-      ? 'ベーシック診断の購入が完了しました'
+      ? 'くわしいチェックの購入が完了しました'
       : productType === 'plan_30day'
       ? '30日プランの購入が完了しました'
       : productType === 'monthly'
@@ -23,7 +23,7 @@ export default async function PaymentSuccessPage({
       : '/parent/dashboard'
 
   const nextLabel =
-    productType === 'basic_assessment' ? '診断を完了する' : 'ダッシュボードへ'
+    productType === 'basic_assessment' ? 'チェックを完了する' : 'ダッシュボードへ'
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">

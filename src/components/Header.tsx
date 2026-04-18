@@ -8,7 +8,7 @@ export default function Header() {
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <span className="text-xl font-bold text-[#1B2A4A]">
-            <span className="text-[#F7941D]">KIDDO</span> Insight
+            <span className="text-[#F7941D]">Manabi</span> Compass
           </span>
         </Link>
         <nav className="flex items-center gap-4">

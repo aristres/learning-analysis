@@ -157,7 +157,7 @@ export default function DemoPlanPage() {
         </div>
 
         {/* 概要 */}
-        <div className="bg-gradient-to-br from-[#1B2A4A] to-[#2C3E6B] rounded-2xl shadow-md p-6 text-white">
+        <div className="bg-gradient-to-br from-[#2B4BAF] to-[#3D6DD4] rounded-2xl shadow-md p-6 text-white">
           <h2 className="text-lg font-bold mb-2">{plan.month}ヶ月目のプラン</h2>
           <p className="text-white/80 text-sm leading-relaxed">{plan.overview}</p>
           <div className="flex gap-3 mt-4">
@@ -199,7 +199,7 @@ export default function DemoPlanPage() {
           <div className="flex flex-wrap gap-2">
             {plan.child_profile.low_domains.map(d => (
               <span key={d} className="px-3 py-1 bg-red-50 text-red-600 rounded-full text-sm font-medium">
-                {DOMAIN_LABELS[d]}（要サポート）
+                {DOMAIN_LABELS[d]}（のびしろ）
               </span>
             ))}
             {plan.child_profile.improving_domains.map(d => (

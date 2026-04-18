@@ -277,7 +277,7 @@ function selectNewStrategies(
         id: picked.id,
         label: picked.label,
         description: picked.description,
-        reason: `${DOMAIN_LABELS[domain.key]}のスコアが${domain.score}点（${domain.level === 'low' ? '要サポート' : '改善中'}）のため`,
+        reason: `${DOMAIN_LABELS[domain.key]}のスコアが${domain.score}点（${domain.level === 'low' ? 'のびしろあり' : '改善中'}）のため`,
         measurable_by: picked.measurable_by,
       })
     }

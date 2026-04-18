@@ -1,16 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { calcBasicAnswersJson } from '@/lib/scoring'
+import { calcBasicAnswersJson, classifyLearningProfile } from '@/lib/scoring'
 import { generateAssessmentReport } from '@/lib/llm'
 import { generatePlan } from '@/lib/plan-generator'
 import type { AnswersJson, LearningStyle } from '@/types'
 
-function determineLearningStyle(answersJson: AnswersJson): LearningStyle {
-  const sensoryScore = answersJson.domains.sensory?.score ?? 50
-  const rawQ19 = answersJson.raw_scores?.Q19 as number | undefined
-  if (sensoryScore >= 65 && rawQ19 === 3) return 'visual'
-  if (sensoryScore < 40) return 'kinesthetic'
-  return 'auditory'
+/** プラン生成用: v2タイプ → LearningStyle (後方互換マッピング) */
+function toLegacyLearningStyle(v2Type: string): LearningStyle {
+  if (v2Type === 'visual') return 'visual'
+  if (v2Type === 'auditory') return 'auditory'
+  return 'kinesthetic'  // kinesthetic / reflective / intuitive / systematic
 }
 
 export async function POST(request: NextRequest) {
@@ -48,8 +47,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // スコア計算
+    // スコア計算 + v2 学習タイプ分類
     const answersJson = calcBasicAnswersJson(rawAnswers, grade)
+    const learningProfile = classifyLearningProfile(answersJson)
 
     // assessment レコードを作成または更新
     let currentAssessmentId = assessmentId
@@ -80,10 +80,10 @@ export async function POST(request: NextRequest) {
         .eq('id', currentAssessmentId)
     }
 
-    // LLM でレポート生成（エラー時はフォールバック）
+    // LLM でレポート生成（v2タイプ情報をコンテキストとして渡す）
     let report
     try {
-      report = await generateAssessmentReport(answersJson)
+      report = await generateAssessmentReport(answersJson, learningProfile)
     } catch (llmErr) {
       console.error('LLM report generation failed:', llmErr)
       // エラー状態を保存
@@ -97,12 +97,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 結果保存
+    // v2 分類をレポートに統合して保存
+    const reportWithV2 = {
+      ...report,
+      v2: { learning_type: learningProfile },
+    }
+
     await supabase
       .from('assessments')
       .update({
         status: 'completed',
-        result_json: report,
+        result_json: reportWithV2,
         completed_at: new Date().toISOString(),
       })
       .eq('id', currentAssessmentId)
@@ -118,7 +123,7 @@ export async function POST(request: NextRequest) {
           .eq('id', childId)
           .single()
 
-        const learningStyle = determineLearningStyle(answersJson)
+        const learningStyle = toLegacyLearningStyle(learningProfile.primary_type)
         const planJson = generatePlan({
           domains: answersJson.domains,
           learningStyle,
@@ -156,7 +161,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       assessmentId: currentAssessmentId,
-      result: report,
+      result: reportWithV2,
       answersJson,
       planId,
     })

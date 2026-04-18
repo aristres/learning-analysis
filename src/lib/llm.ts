@@ -1,5 +1,5 @@
 import OpenAI from 'openai'
-import type { AnswersJson, AssessmentResult } from '@/types'
+import type { AnswersJson, AssessmentResult, LearningTypeResult } from '@/types'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
@@ -39,9 +39,10 @@ async function withRetry<T>(
 // =============================================
 
 export async function generateAssessmentReport(
-  answersJson: AnswersJson
+  answersJson: AnswersJson,
+  learningProfile?: LearningTypeResult
 ): Promise<AssessmentResult> {
-  const prompt = buildAssessmentPrompt(answersJson)
+  const prompt = buildAssessmentPrompt(answersJson, learningProfile)
 
   return withRetry(async () => {
     const completion = await openai.chat.completions.create({
@@ -121,7 +122,17 @@ export async function generateFreeReport(
 // プロンプトビルダー（ベーシック診断）
 // =============================================
 
-function buildAssessmentPrompt(answersJson: AnswersJson): string {
+function buildAssessmentPrompt(answersJson: AnswersJson, learningProfile?: LearningTypeResult): string {
+  const typeContext = learningProfile
+    ? `
+【v2 学習タイプ分類（ルールベース判定済み）】
+- プライマリタイプ: ${learningProfile.type_label}（${learningProfile.primary_type}）
+- タイプの傾向: ${learningProfile.type_description}
+- サブタグ: ${learningProfile.sub_tags.length > 0 ? learningProfile.sub_tags.join(', ') : 'なし'}
+
+このタイプ情報をコンテキストとして活かし、study_style はこのタイプと一貫性のある内容で記述してください。`
+    : ''
+
   return `教育心理・認知特性・特別支援・家庭学習支援の観点から、
 親が回答した質問データをもとに、学習特性レポートを作成してください。
 
@@ -132,33 +143,35 @@ function buildAssessmentPrompt(answersJson: AnswersJson): string {
 - 効果の薄い一般論は禁止
 - 年齢に不適切な内容は禁止
 - 医療診断に該当する表現は禁止（ADHDなどの名称も禁止）
-- "行動ベースでの特徴"に限定すること
+- "行動ベースでの特徴"に限定すること（「〜の傾向があります」「〜しやすいようです」など傾向表現を使う）
+- 断定表現（「〜です」「〜の子です」）は避け、傾向・可能性の表現を使うこと
 - 家庭で再現可能なアドバイスのみを書くこと
 - 否定表現ではなく、改善の方向性を書くこと
-
+${typeContext}
 【生成ルール詳細】
 
 ●summary
 - お子さんの特徴を「ポジティブに、かつ嘘なく」1段落でまとめる。
+- 「〜の傾向が見られます」「〜しやすいお子さんのようです」など傾向表現を使う。
 
 ●strengths
 - 課題処理・集中・理解方法などの「認知特性ベースの強み」を3つ。
 
 ●weaknesses
 - 責める表現は禁止。
-- "行動上つまずきやすい傾向"を3つ。
+- "行動上つまずきやすい傾向"を3つ。傾向表現を使うこと。
 
 ●risk_situations
-- 「こういう場面で困りやすい」という場面描写を書く。
-（例：手順が多いプリントだと混乱しやすい、など）
+- 「こういう場面で困りやすい傾向がある」という場面描写を書く。
+（例：手順が多いプリントだと混乱しやすい傾向がある、など）
 
 ●home_strategies
 - 親が"そのまま明日から使える"手立てを3つ。
 - 「5分区切り」「見本を置く」「視覚化」のような即効性のある方法に限定。
 
 ●study_style
-- 回答傾向から判断される学習スタイル（視覚/聴覚/体感 など）を1つ選ぶ。
-- なぜそのスタイルが合うのか、説明を入れる。
+- v2タイプ分類と一貫性のある学習スタイルを記述する。
+- なぜそのスタイルが合う傾向があるのか、説明を入れる。
 
 -------------------------
 【入力データ】
@@ -182,9 +195,9 @@ ${JSON.stringify(answersJson, null, 2)}
     "つまずきやすい特性3"
   ],
   "risk_situations": [
-    "困りやすい場面1（行動ベース）",
-    "困りやすい場面2（行動ベース）",
-    "困りやすい場面3（行動ベース）"
+    "困りやすい場面1（行動ベース・傾向表現）",
+    "困りやすい場面2（行動ベース・傾向表現）",
+    "困りやすい場面3（行動ベース・傾向表現）"
   ],
   "home_strategies": [
     "家庭でできる手立て1（具体的に）",
@@ -192,8 +205,8 @@ ${JSON.stringify(answersJson, null, 2)}
     "家庭でできる手立て3（具体的に）"
   ],
   "study_style": {
-    "type": "視覚/聴覚/体感/読み書き など1つ",
-    "description": "そのスタイルが合う理由を簡潔に"
+    "type": "視覚/聴覚/体感/熟慮/直感/構造 など1つ",
+    "description": "そのスタイルが合う傾向がある理由を簡潔に"
   }
 }
 

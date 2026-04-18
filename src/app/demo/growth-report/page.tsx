@@ -83,7 +83,7 @@ export default function DemoGrowthReportPage() {
         </div>
 
         {/* 全期間サマリー */}
-        <div className="bg-gradient-to-br from-[#1B2A4A] to-[#2C3E6B] rounded-2xl shadow-md p-6 text-white">
+        <div className="bg-gradient-to-br from-[#2B4BAF] to-[#3D6DD4] rounded-2xl shadow-md p-6 text-white">
           <h2 className="text-lg font-bold mb-4">3ヶ月の成長サマリー</h2>
           <div className="grid grid-cols-3 gap-4 mb-4">
             <div className="text-center">

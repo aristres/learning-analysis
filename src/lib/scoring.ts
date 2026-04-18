@@ -1,4 +1,12 @@
-import type { AnswersJson, DomainScore, DomainLevel, FreeAnswersRaw } from '@/types'
+import type {
+  AnswersJson,
+  DomainScore,
+  DomainLevel,
+  FreeAnswersRaw,
+  LearningType,
+  LearningTypeResult,
+  SubTag,
+} from '@/types'
 
 // =============================================
 // スコア計算ユーティリティ
@@ -171,5 +179,145 @@ export function calcFreeAnswersJson(
       fragile_emotion: false,
       weak_study_habit: study_habits.score < 40,
     },
+  }
+}
+
+// =============================================
+// v2 学習タイプ分類
+// =============================================
+
+/** タイプ別のメタ情報 */
+const TYPE_META: Record<LearningType, { label: string; description: string }> = {
+  visual: {
+    label: '見てわかるタイプ',
+    description:
+      '視覚的な情報（図・絵・文字）を通じて理解しやすい傾向があります。板書を写すことや、図解・動画を使った学習が合いやすいと考えられます。',
+  },
+  auditory: {
+    label: '聞いてわかるタイプ',
+    description:
+      '口頭の説明や音声を通じて理解しやすい傾向があります。声に出して読む・親が読み上げる・説明を聞く、といったアプローチが合いやすいと考えられます。',
+  },
+  kinesthetic: {
+    label: '体験してわかるタイプ',
+    description:
+      '実際にやってみることで理解が進みやすい傾向があります。手を動かす作業・ゲーム感覚の練習・体を使った学習が合いやすいと考えられます。',
+  },
+  reflective: {
+    label: 'じっくり考えるタイプ',
+    description:
+      '時間をかけて丁寧に考えることで理解を深めやすい傾向があります。急かさず・ステップを明確にした学習環境が合いやすいと考えられます。',
+  },
+  intuitive: {
+    label: 'ひらめきタイプ',
+    description:
+      '全体像をつかむのが早く、直感的に理解しやすい傾向があります。パターンを見つけたり、応用問題に挑戦したりする場面で力を発揮しやすいと考えられます。',
+  },
+  systematic: {
+    label: '順序立てるタイプ',
+    description:
+      '手順やルールを覚えることで安定して取り組める傾向があります。チェックリストや決まった学習ルーティンが合いやすいと考えられます。',
+  },
+}
+
+const MODALITY_NOTE =
+  '※ このタイプ判定は保護者の観察回答に基づく行動傾向の参考情報です。医学的・心理学的な診断ではありません。また、学習スタイルの分類は一つの見方にすぎず、お子さんは複数のスタイルを持つ場合がほとんどです。家庭での手立ての参考としてお使いください。'
+
+/**
+ * 6タイプ学習スタイルを判定する
+ * ルールベースの重み付きポイントシステム
+ */
+function determineLearningType(answersJson: AnswersJson): LearningType {
+  const d = answersJson.domains
+  const r = answersJson.raw_scores
+
+  const points: Record<LearningType, number> = {
+    visual: 0,
+    auditory: 0,
+    kinesthetic: 0,
+    reflective: 0,
+    intuitive: 0,
+    systematic: 0,
+  }
+
+  // ── 視覚型シグナル ──
+  if (r.Q19 === 3) points.visual += 3  // 視覚情報で理解しやすい
+  if (r.Q19 === 2) points.visual += 1
+  if (d.sensory.level === 'high') points.visual += 2
+  if (d.kanji_literacy.level !== 'low') points.visual += 1  // 文字情報も得意
+
+  // ── 聴覚型シグナル ──
+  if (r.Q18 >= 2) points.auditory += 2  // 音への過敏性が低い = 聴覚チャンネルが使いやすい
+  if (r.Q6 >= 2) points.auditory += 2  // 説明を聞いて理解できる
+  if (r.Q2 >= 2) points.auditory += 1  // 授業での聴取が安定
+
+  // ── 体験型シグナル ──
+  if (r.Q19 <= 2) points.kinesthetic += 1  // 視覚優位ではない
+  if (r.Q8 >= 2) points.kinesthetic += 2   // 作業・実践スピードが良い
+  if (d.working_memory.level === 'low') points.kinesthetic += 1  // 手順記憶より体験が合う
+  if (d.study_habits.level !== 'low') points.kinesthetic += 1
+
+  // ── 熟慮型シグナル ──
+  if (d.processing_speed.level === 'low') points.reflective += 3  // ゆっくり処理する
+  if (d.working_memory.level !== 'low') points.reflective += 2    // 深く考える力はある
+  if (d.motivation_emotion.level !== 'low') points.reflective += 1
+
+  // ── 直感型シグナル ──
+  if (d.processing_speed.level === 'high') points.intuitive += 3  // 素早い理解
+  if (d.attention.level !== 'low') points.intuitive += 2          // 集中力がある
+  if (d.motivation_emotion.level === 'high') points.intuitive += 1
+
+  // ── 構造型シグナル ──
+  if (d.working_memory.level === 'high') points.systematic += 3  // 手順記憶が強い
+  if (d.study_habits.level !== 'low') points.systematic += 2     // 習慣化できる
+  if ((r.Q4 as number) >= 2) points.systematic += 1              // 手順の多い課題もこなせる
+  if (r.Q20 >= 2) points.systematic += 1                         // 生活リズムが整っている
+
+  // 最高ポイントのタイプを返す
+  const sorted = (Object.entries(points) as [LearningType, number][]).sort(
+    ([, a], [, b]) => b - a
+  )
+  return sorted[0][0]
+}
+
+/**
+ * サブタグ（補足特性）を判定する
+ */
+function determineSubTags(answersJson: AnswersJson): SubTag[] {
+  const d = answersJson.domains
+  const r = answersJson.raw_scores
+  const f = answersJson.flags
+
+  const tags: SubTag[] = []
+
+  if (d.attention.level === 'low') tags.push('needs_attention_support')
+  if (d.working_memory.level === 'high') tags.push('strong_working_memory')
+  if (d.motivation_emotion.level === 'low' || f.fragile_emotion) tags.push('needs_emotional_support')
+  if ((r.Q19 as number) === 3) tags.push('visual_strength')
+  if ((r.Q18 as number) === 1) tags.push('sound_sensitive')
+  if (d.math_calculation.level === 'high') tags.push('math_strength')
+  if (d.kanji_literacy.level === 'high') tags.push('language_strength')
+  if (r.Q20 === 1) tags.push('needs_routine_support')
+  if ((r.Q3 as number) === 3) tags.push('self_starter')
+  if (d.motivation_emotion.level === 'high') tags.push('emotionally_resilient')
+
+  return tags
+}
+
+/**
+ * v2 学習プロファイル分類のエントリーポイント
+ * ベーシック診断の AnswersJson から LearningTypeResult を生成する
+ */
+export function classifyLearningProfile(answersJson: AnswersJson): LearningTypeResult {
+  const primary_type = determineLearningType(answersJson)
+  const sub_tags = determineSubTags(answersJson)
+  const meta = TYPE_META[primary_type]
+
+  return {
+    primary_type,
+    type_label: meta.label,
+    type_description: meta.description,
+    sub_tags,
+    modality_note: MODALITY_NOTE,
   }
 }

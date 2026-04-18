@@ -180,6 +180,10 @@ export interface AssessmentResult {
     type: string
     description: string
   }
+  /** v2: ルールベース学習タイプ分類（後方互換のためoptional） */
+  v2?: {
+    learning_type: LearningTypeResult
+  }
 }
 
 // =============================================
@@ -197,6 +201,41 @@ export type StrategyCategory =
   | 'sensory'
 
 export type LearningStyle = 'visual' | 'auditory' | 'kinesthetic'
+
+// =============================================
+// v2 学習タイプ分類
+// =============================================
+
+/** 6タイプ学習スタイル（行動観察ベース） */
+export type LearningType =
+  | 'visual'       // 見てわかるタイプ
+  | 'auditory'     // 聞いてわかるタイプ
+  | 'kinesthetic'  // 体験してわかるタイプ
+  | 'reflective'   // じっくり考えるタイプ
+  | 'intuitive'    // ひらめきタイプ
+  | 'systematic'   // 順序立てるタイプ
+
+/** サブタグ（補足特性） */
+export type SubTag =
+  | 'needs_attention_support'   // 集中サポートあり
+  | 'strong_working_memory'     // 記憶・手順が得意
+  | 'needs_emotional_support'   // 感情サポートあり
+  | 'visual_strength'           // 視覚情報が得意
+  | 'sound_sensitive'           // 音に敏感
+  | 'math_strength'             // 算数が得意
+  | 'language_strength'         // 国語・読解が得意
+  | 'needs_routine_support'     // 生活リズムを整えよう
+  | 'self_starter'              // 自己スタート力◎
+  | 'emotionally_resilient'     // 感情が安定
+
+/** v2 学習プロファイル分類結果 */
+export interface LearningTypeResult {
+  primary_type: LearningType
+  type_label: string           // 例: "見てわかるタイプ"
+  type_description: string     // 傾向表現による説明
+  sub_tags: SubTag[]
+  modality_note: string        // モデル限界の開示文
+}
 
 export type DomainKey = keyof AnswersJson['domains']
 

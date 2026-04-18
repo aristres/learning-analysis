@@ -2,7 +2,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'プライバシーポリシー | KIDDO Insight',
+  title: 'プライバシーポリシー | Manabi Compass',
 }
 
 export default function PrivacyPage() {
@@ -17,7 +17,7 @@ export default function PrivacyPage() {
             <section>
               <h2 className="text-lg font-bold text-[#1B2A4A] mb-2">1. 事業者情報</h2>
               <p className="text-gray-700 leading-relaxed">
-                KIDDO Insight（以下「当サービス」）は、お子さまの学習特性を分析し、
+                Manabi Compass（以下「当サービス」）は、お子さまの学習特性を分析し、
                 家庭での学習支援に役立つ情報を提供するサービスです。
               </p>
             </section>

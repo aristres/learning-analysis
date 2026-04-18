@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
-import type { AssessmentResult, AnswersJson } from '@/types'
+import type { AssessmentResult, AnswersJson, SubTag } from '@/types'
 import Link from 'next/link'
 
 const DOMAIN_LABELS: Record<string, string> = {
@@ -14,16 +14,57 @@ const DOMAIN_LABELS: Record<string, string> = {
   kanji_literacy: '国語・漢字',
 }
 
-const LEVEL_COLORS: Record<string, string> = {
+const LEVEL_BAR_COLORS: Record<string, string> = {
+  low: 'bg-orange-400',
+  middle: 'bg-blue-400',
+  high: 'bg-green-500',
+}
+
+const LEVEL_BADGE_COLORS: Record<string, string> = {
   low: 'bg-orange-100 text-orange-700',
   middle: 'bg-blue-100 text-blue-700',
   high: 'bg-green-100 text-green-700',
 }
 
 const LEVEL_LABELS: Record<string, string> = {
-  low: '要サポート',
-  middle: '平均的',
+  low: 'のびしろ',
+  middle: '標準的',
   high: '強み',
+}
+
+const TYPE_EMOJI: Record<string, string> = {
+  visual: '👁️',
+  auditory: '👂',
+  kinesthetic: '🤲',
+  reflective: '🧠',
+  intuitive: '⚡',
+  systematic: '📋',
+}
+
+const SUB_TAG_LABELS: Record<SubTag, string> = {
+  needs_attention_support: '集中の手立てが役立つ',
+  strong_working_memory: '記憶・手順が得意',
+  needs_emotional_support: '気持ちのサポートが効果的',
+  visual_strength: '視覚情報が得意',
+  sound_sensitive: '音の多い環境が苦手な傾向',
+  math_strength: '算数が得意',
+  language_strength: '国語・読解が得意',
+  needs_routine_support: 'リズムづくりがのびしろ',
+  self_starter: '自分から始める力◎',
+  emotionally_resilient: '気持ちが安定している',
+}
+
+const SUB_TAG_COLORS: Record<SubTag, string> = {
+  needs_attention_support: 'bg-orange-100 text-orange-700',
+  strong_working_memory: 'bg-green-100 text-green-700',
+  needs_emotional_support: 'bg-purple-100 text-purple-700',
+  visual_strength: 'bg-blue-100 text-blue-700',
+  sound_sensitive: 'bg-yellow-100 text-yellow-700',
+  math_strength: 'bg-green-100 text-green-700',
+  language_strength: 'bg-blue-100 text-blue-700',
+  needs_routine_support: 'bg-orange-100 text-orange-700',
+  self_starter: 'bg-green-100 text-green-700',
+  emotionally_resilient: 'bg-teal-100 text-teal-700',
 }
 
 export default async function ReportPage({
@@ -78,10 +119,39 @@ export default async function ReportPage({
             </p>
           )}
           <p className="text-xs text-gray-400 mt-1">
-            {assessment.type === 'basic' ? 'ベーシック診断' : '無料診断'} ·{' '}
+            {assessment.type === 'basic' ? 'くわしいチェック' : 'かんたんチェック'} ·{' '}
             {new Date(assessment.created_at).toLocaleDateString('ja-JP')}
           </p>
         </div>
+
+        {/* v2 TypeBanner */}
+        {result.v2?.learning_type && (
+          <div className="bg-gradient-to-br from-[#2B4BAF] to-[#3D6DD4] rounded-xl shadow-md p-6 text-white">
+            <p className="text-white/60 text-xs font-medium uppercase tracking-wider mb-2">学習タイプ</p>
+            <div className="flex items-center gap-3 mb-3">
+              <span className="text-4xl">{TYPE_EMOJI[result.v2.learning_type.primary_type] ?? '📚'}</span>
+              <h2 className="text-2xl font-bold">{result.v2.learning_type.type_label}</h2>
+            </div>
+            <p className="text-white/80 text-sm leading-relaxed mb-4">
+              {result.v2.learning_type.type_description}
+            </p>
+            {result.v2.learning_type.sub_tags.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {result.v2.learning_type.sub_tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className={`text-xs px-2.5 py-1 rounded-full font-medium ${SUB_TAG_COLORS[tag]}`}
+                  >
+                    {SUB_TAG_LABELS[tag]}
+                  </span>
+                ))}
+              </div>
+            )}
+            <p className="text-white/40 text-xs mt-4 leading-relaxed">
+              {result.v2.learning_type.modality_note}
+            </p>
+          </div>
+        )}
 
         {/* サマリー */}
         <div className="bg-white rounded-xl shadow-sm p-6">
@@ -89,31 +159,28 @@ export default async function ReportPage({
           <p className="text-gray-700 leading-relaxed">{result.summary}</p>
         </div>
 
-        {/* ドメインスコア */}
+        {/* 領域別の傾向（スコア数値なし） */}
         {answersJson && (
           <div className="bg-white rounded-xl shadow-sm p-6">
-            <h2 className="text-lg font-bold text-gray-800 mb-4">領域別スコア</h2>
+            <h2 className="text-lg font-bold text-gray-800 mb-4">領域別の傾向</h2>
             <div className="space-y-3">
               {Object.entries(answersJson.domains).map(([key, domain]) => (
                 <div key={key}>
-                  <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center justify-between mb-1.5">
                     <span className="text-sm text-gray-700">{DOMAIN_LABELS[key] ?? key}</span>
                     <span
                       className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                        LEVEL_COLORS[domain.level]
+                        LEVEL_BADGE_COLORS[domain.level]
                       }`}
                     >
                       {LEVEL_LABELS[domain.level]}
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-gray-100 rounded-full h-2">
                     <div
-                      className="bg-[#F7941D] h-2 rounded-full transition-all"
-                      style={{ width: `${domain.score}%` }}
+                      className={`${LEVEL_BAR_COLORS[domain.level]} h-2 rounded-full transition-all`}
+                      style={{ width: domain.level === 'low' ? '25%' : domain.level === 'middle' ? '55%' : '85%' }}
                     />
-                  </div>
-                  <div className="text-right text-xs text-gray-400 mt-0.5">
-                    {domain.score}点
                   </div>
                 </div>
               ))}
@@ -219,8 +286,8 @@ export default async function ReportPage({
 
         {/* プランCTA */}
         {linkedPlan && (
-          <div className="bg-gradient-to-br from-[#1B2A4A] to-[#2C3E6B] rounded-xl p-6 text-center text-white">
-            <p className="text-white/80 mb-2">この診断に基づく学習プランが生成されています</p>
+          <div className="bg-gradient-to-br from-[#2B4BAF] to-[#3D6DD4] rounded-xl p-6 text-center text-white">
+            <p className="text-white/80 mb-2">このチェックに基づく学習プランが生成されています</p>
             <Link
               href={`/parent/plan/${linkedPlan.id}`}
               className="inline-block px-8 py-3 bg-[#F7941D] text-white rounded-lg font-medium hover:bg-[#E8850F] transition"
@@ -238,7 +305,7 @@ export default async function ReportPage({
               href="/signup"
               className="inline-block px-8 py-3 bg-[#F7941D] text-white rounded-lg font-medium hover:bg-[#E8850F] transition"
             >
-              ベーシック診断へ（¥1,480）
+              くわしいチェックへ（¥1,480）
             </Link>
           </div>
         )}

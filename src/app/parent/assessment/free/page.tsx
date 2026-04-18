@@ -201,7 +201,7 @@ export default function FreeAssessmentPage() {
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#FFF8F0] mb-4">
                 <span className="text-3xl">📊</span>
               </div>
-              <h1 className="text-2xl font-bold text-[#1B2A4A] mb-1">無料診断レポート</h1>
+              <h1 className="text-2xl font-bold text-[#1B2A4A] mb-1">かんたんチェックレポート</h1>
               <p className="text-gray-500 text-sm">{childName}さん（{grade}）</p>
             </div>
 
@@ -245,13 +245,13 @@ export default function FreeAssessmentPage() {
 
             <div className="border-t border-gray-100 pt-6 text-center">
               <p className="text-gray-500 text-sm mb-4">
-                より詳しい分析・家庭学習プランは「ベーシック診断」で
+                より詳しい分析・家庭学習プランは「くわしいチェック」で
               </p>
               <a
                 href="/signup"
                 className="inline-block px-8 py-3 bg-[#F7941D] text-white rounded-full font-medium hover:bg-[#E8850F] transition shadow-md"
               >
-                ベーシック診断へ（¥1,480）
+                くわしいチェックへ（¥1,480）
               </a>
             </div>
           </div>
@@ -271,9 +271,16 @@ export default function FreeAssessmentPage() {
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#FFF8F0] mb-4">
                 <span className="text-3xl">🧒</span>
               </div>
-              <h1 className="text-2xl font-bold text-[#1B2A4A] mb-2">無料診断</h1>
+              <h1 className="text-2xl font-bold text-[#1B2A4A] mb-2">かんたんチェック（無料）</h1>
               <p className="text-gray-500 text-sm">
                 約3分・8問で学習の傾向を把握できます
+              </p>
+            </div>
+
+            {/* アンカー教示 */}
+            <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-2">
+              <p className="text-sm text-amber-800 leading-relaxed">
+                💡 <span className="font-medium">回答のコツ：</span>「昨日の様子」ではなく、<span className="font-medium">最近2週間の典型的な日</span>を思い浮かべながら答えてください。
               </p>
             </div>
 
@@ -312,7 +319,7 @@ export default function FreeAssessmentPage() {
               disabled={!canProceed}
               className="mt-6 w-full py-4 bg-[#F7941D] text-white rounded-full font-bold text-lg hover:bg-[#E8850F] disabled:opacity-40 disabled:cursor-not-allowed transition shadow-md"
             >
-              診断を始める
+              チェックを始める
             </button>
           </div>
         </div>
@@ -417,7 +424,7 @@ export default function FreeAssessmentPage() {
                 disabled={(multiAnswers[q.key]?.length ?? 0) === 0}
                 className="mt-6 w-full py-4 bg-[#F7941D] text-white rounded-full font-bold text-lg hover:bg-[#E8850F] disabled:opacity-40 disabled:cursor-not-allowed transition"
               >
-                {isLastQuestion ? '診断結果を見る' : '次へ'}
+                {isLastQuestion ? '結果を見る' : '次へ'}
               </button>
             </>
           )}
@@ -428,7 +435,7 @@ export default function FreeAssessmentPage() {
               onClick={handleSubmit}
               className="mt-6 w-full py-4 bg-[#F7941D] text-white rounded-full font-bold text-lg hover:bg-[#E8850F] transition"
             >
-              診断結果を見る
+              結果を見る
             </button>
           )}
 

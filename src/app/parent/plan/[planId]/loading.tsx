@@ -3,7 +3,7 @@ export default function PlanLoading() {
     <div className="min-h-screen bg-gray-50 py-10 px-4">
       <div className="max-w-2xl mx-auto space-y-6">
         {/* ヘッダー */}
-        <div className="bg-gradient-to-br from-[#1B2A4A] to-[#2C3E6B] rounded-xl p-6 text-center animate-pulse">
+        <div className="bg-gradient-to-br from-[#2B4BAF] to-[#3D6DD4] rounded-xl p-6 text-center animate-pulse">
           <div className="h-7 bg-white/20 rounded w-56 mx-auto mb-2" />
           <div className="h-4 bg-white/10 rounded w-40 mx-auto" />
         </div>

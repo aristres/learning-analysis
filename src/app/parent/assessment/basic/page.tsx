@@ -164,8 +164,15 @@ function BasicAssessmentContent() {
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#FFF8F0] mb-4">
                 <span className="text-3xl">📋</span>
               </div>
-              <h1 className="text-2xl font-bold text-[#1B2A4A] mb-2">ベーシック診断</h1>
+              <h1 className="text-2xl font-bold text-[#1B2A4A] mb-2">くわしいチェック</h1>
               <p className="text-gray-500 text-sm">20問・詳細な学習特性レポートを生成します</p>
+            </div>
+
+            {/* アンカー教示 */}
+            <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-2">
+              <p className="text-sm text-amber-800 leading-relaxed">
+                💡 <span className="font-medium">回答のコツ：</span>「昨日の様子」ではなく、<span className="font-medium">最近2週間の典型的な日</span>を思い浮かべながら答えてください。より正確な傾向が把握できます。
+              </p>
             </div>
 
             <div className="bg-white rounded-2xl shadow-md p-6 space-y-4">
@@ -203,7 +210,7 @@ function BasicAssessmentContent() {
               disabled={!canProceed}
               className="mt-6 w-full py-4 bg-[#F7941D] text-white rounded-full font-bold text-lg hover:bg-[#E8850F] disabled:opacity-40 disabled:cursor-not-allowed transition shadow-md"
             >
-              診断を始める
+              チェックを始める
             </button>
           </div>
         </div>

@@ -98,7 +98,7 @@ export default async function PlanPage({
         </div>
 
         {/* Overview Card */}
-        <div className="bg-gradient-to-br from-[#1B2A4A] to-[#2C3E6B] text-white rounded-2xl p-6">
+        <div className="bg-gradient-to-br from-[#2B4BAF] to-[#3D6DD4] text-white rounded-2xl p-6">
           <h2 className="text-lg font-bold mb-2">
             {planJson.month}ヶ月目のプラン
           </h2>
@@ -137,7 +137,7 @@ export default async function PlanPage({
                 key={d}
                 className="px-3 py-1 bg-red-50 text-red-600 rounded-full text-sm"
               >
-                {DOMAIN_LABELS[d]}（要サポート）
+                {DOMAIN_LABELS[d]}（のびしろ）
               </span>
             ))}
             {planJson.child_profile?.improving_domains?.map((d) => (

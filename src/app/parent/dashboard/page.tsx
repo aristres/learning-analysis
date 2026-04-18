@@ -38,7 +38,7 @@ export default async function ParentDashboard() {
       {/* ナビ */}
       <header className="bg-white border-b px-4 py-3">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <h1 className="text-xl font-bold text-[#1B2A4A]">KIDDO Insight</h1>
+          <h1 className="text-xl font-bold text-[#1B2A4A]">Manabi Compass</h1>
           <form action="/api/auth/signout" method="post">
             <button className="text-sm text-gray-500 hover:text-gray-700">ログアウト</button>
           </form>
@@ -78,7 +78,7 @@ export default async function ParentDashboard() {
                       href={`/parent/assessment/basic?childId=${child.id}`}
                       className="flex-1 text-center text-sm py-1.5 border border-[#F7941D] text-[#F7941D] rounded-lg hover:bg-[#FFF8F0]"
                     >
-                      診断する
+                      チェックする
                     </Link>
                     <Link
                       href={`/parent/children/${child.id}/progress`}
@@ -108,7 +108,7 @@ export default async function ParentDashboard() {
           <h3 className="text-lg font-bold text-[#1B2A4A] mb-2">プランをアップグレード</h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="bg-white rounded-lg p-4 text-center">
-              <div className="font-bold text-gray-800 mb-1">ベーシック診断</div>
+              <div className="font-bold text-gray-800 mb-1">くわしいチェック</div>
               <div className="text-2xl font-bold text-[#F7941D] mb-1">¥1,480</div>
               <p className="text-xs text-gray-500 mb-3">20問・詳細レポート</p>
               <Link
@@ -176,7 +176,7 @@ export default async function ParentDashboard() {
         {/* 直近の診断結果 */}
         {assessments && assessments.length > 0 && (
           <section>
-            <h3 className="text-lg font-bold text-gray-700 mb-3">診断履歴</h3>
+            <h3 className="text-lg font-bold text-gray-700 mb-3">チェック履歴</h3>
             <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
               {(assessments as (DbAssessment & { children: { name: string } | null })[]).map(
                 (a) => (
@@ -190,7 +190,7 @@ export default async function ParentDashboard() {
                         {a.children?.name ?? '—'}
                       </p>
                       <p className="text-sm text-gray-500">
-                        {a.type === 'basic' ? 'ベーシック診断' : '無料診断'} ·{' '}
+                        {a.type === 'basic' ? 'くわしいチェック' : 'かんたんチェック'} ·{' '}
                         {new Date(a.created_at).toLocaleDateString('ja-JP')}
                       </p>
                     </div>

@@ -1,4 +1,6 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   --color-primary: #1B2A4A;
@@ -10,12 +12,6 @@
   --color-bg: #F8FAFC;
   --color-card: #FFFFFF;
   --color-accent-light: #FFF8F0;
-}
-
-@theme inline {
-  --color-background: var(--color-bg);
-  --color-foreground: var(--color-primary);
-  --font-sans: var(--font-noto-sans-jp);
 }
 
 body {

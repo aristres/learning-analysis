@@ -12,8 +12,8 @@ const notoSansJP = Noto_Sans_JP({
 
 export const metadata: Metadata = {
   title: {
-    default: 'KIDDO Insight | 子どもの学習特性診断',
-    template: '%s | KIDDO Insight',
+    default: 'Manabi Compass | お子さんの学び方ナビ',
+    template: '%s | Manabi Compass',
   },
   description:
     'たった3分の質問でお子さんの学習特性をAIが科学的に分析。8つの認知領域から強みを見つけ、個別最適化された学習プランを提案します。',
@@ -27,20 +27,21 @@ export const metadata: Metadata = {
     '小学生',
     '中学生',
     '学習支援',
-    'KIDDO Insight',
+    'Manabi Compass',
+    'マナビコンパス',
   ],
-  authors: [{ name: 'KIDDO Insight' }],
+  authors: [{ name: 'Manabi Compass' }],
   openGraph: {
     type: 'website',
     locale: 'ja_JP',
-    siteName: 'KIDDO Insight',
-    title: 'KIDDO Insight | 子どもの学習特性診断',
+    siteName: 'Manabi Compass',
+    title: 'Manabi Compass | お子さんの学び方ナビ',
     description:
       'たった3分の質問でお子さんの学習特性をAIが科学的に分析。8つの認知領域から強みを見つけ、個別最適化された学習プランを提案します。',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'KIDDO Insight | 子どもの学習特性診断',
+    title: 'Manabi Compass | お子さんの学び方ナビ',
     description:
       'たった3分でお子さんの学習の傾向がわかる。AI分析による個別最適化された学習プランを提案。',
   },

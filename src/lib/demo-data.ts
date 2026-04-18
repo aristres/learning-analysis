@@ -96,6 +96,17 @@ export const DEMO_RESULT: AssessmentResult = {
     description:
       '目で見た情報を効率よく処理できるため、文字だけの説明よりも、図解・フローチャート・色分けを使った教材がもっとも理解を深めやすいスタイルです。',
   },
+  v2: {
+    learning_type: {
+      primary_type: 'visual' as const,
+      type_label: '見てわかるタイプ',
+      type_description:
+        '視覚的な情報（図・絵・文字）を通じて理解しやすい傾向があります。板書を写すことや、図解・動画を使った学習が合いやすいと考えられます。',
+      sub_tags: ['visual_strength', 'sound_sensitive'] as const,
+      modality_note:
+        '※ このタイプ判定は保護者の観察回答に基づく行動傾向の参考情報です。医学的・心理学的な診断ではありません。また、学習スタイルの分類は一つの見方にすぎず、お子さんは複数のスタイルを持つ場合がほとんどです。家庭での手立ての参考としてお使いください。',
+    },
+  },
 }
 
 // =============================================
@@ -167,7 +178,7 @@ export const DEMO_MONTHLY_REVIEWS: MonthlyReviewJson[] = [
       { week: 4, avg_mood: 3.0, completion_rate: 92, self_start_count: 6, struggle_subjects: [] },
     ],
     effective_strategies: ['タイムアタック計算', '漢字4ステップ', '付箋リスト'],
-    ai_summary: '3ヶ月目は算数の伸びが目立ちました。タイムアタック方式が楽しいと感じており、計算スピードが向上。全体的にスコアが改善し、特に「要サポート」だった学習習慣と漢字が「平均的」レベルに到達しました。',
+    ai_summary: '3ヶ月目は算数の伸びが目立ちました。タイムアタック方式が楽しいと感じており、計算スピードが向上。全体的にスコアが改善し、特にのびしろとして挙がっていた学習習慣と漢字が「平均的」レベルに到達しました。',
   },
 ]
 
