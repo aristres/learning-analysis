@@ -3,9 +3,15 @@ import Stripe from 'stripe'
 import { createClient } from '@/lib/supabase/server'
 import type { ProductType } from '@/types'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2026-01-28.clover',
-})
+let _stripe: Stripe | null = null
+function getStripe(): Stripe {
+  if (!_stripe) {
+    _stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+      apiVersion: '2026-01-28.clover',
+    })
+  }
+  return _stripe
+}
 
 // 商品タイプ → Stripe Price ID のマッピング
 const PRICE_MAP: Record<ProductType, string> = {
@@ -60,7 +66,7 @@ export async function POST(request: NextRequest) {
         .eq('id', user.id)
         .single()
 
-      const customer = await stripe.customers.create({
+      const customer = await getStripe().customers.create({
         email: userData?.email ?? user.email ?? '',
         name: userData?.display_name ?? '',
         metadata: { supabase_user_id: user.id },
@@ -97,7 +103,7 @@ export async function POST(request: NextRequest) {
       locale: 'ja',
     }
 
-    const session = await stripe.checkout.sessions.create(sessionConfig)
+    const session = await getStripe().checkout.sessions.create(sessionConfig)
 
     // subscriptions レコードを作成（pending 状態）
     await supabase.from('subscriptions').insert({
