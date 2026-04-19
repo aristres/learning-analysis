@@ -1,11 +1,18 @@
 import OpenAI from 'openai'
 import type { AnswersJson, AssessmentResult, LearningTypeResult } from '@/types'
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-  timeout: 60_000, // 60秒タイムアウト
-  maxRetries: 2,   // 自動リトライ2回
-})
+// 遅延初期化：ビルド時ではなく実行時にのみクライアントを生成する
+let _openai: OpenAI | null = null
+function getOpenAI(): OpenAI {
+  if (!_openai) {
+    _openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY!,
+      timeout: 60_000,
+      maxRetries: 2,
+    })
+  }
+  return _openai
+}
 
 // =============================================
 // リトライヘルパー（アプリケーションレベル）
@@ -45,7 +52,7 @@ export async function generateAssessmentReport(
   const prompt = buildAssessmentPrompt(answersJson, learningProfile)
 
   return withRetry(async () => {
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAI().chat.completions.create({
       model: 'gpt-4o',
       max_tokens: 2048,
       response_format: { type: 'json_object' },
@@ -87,7 +94,7 @@ export async function generateFreeReport(
   const prompt = buildFreePrompt(answersJson)
 
   return withRetry(async () => {
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAI().chat.completions.create({
       model: 'gpt-4o-mini',
       max_tokens: 1024,
       response_format: { type: 'json_object' },
