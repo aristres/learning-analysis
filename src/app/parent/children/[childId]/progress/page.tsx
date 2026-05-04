@@ -194,10 +194,10 @@ export default async function ProgressPage({
                       <p className="text-xs font-medium text-gray-700">
                         {new Date(log.log_date).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric', weekday: 'short' })}
                       </p>
-                      {(log.answers_json as Record<string, string> | null)?.Q10 &&
-                        (log.answers_json as Record<string, string>).Q10 !== '—' && (
+                      {(log.answers_json as unknown as Record<string, string> | null)?.Q10 &&
+                        (log.answers_json as unknown as Record<string, string>).Q10 !== '—' && (
                         <p className="text-xs text-gray-400 truncate">
-                          {(log.answers_json as Record<string, string>).Q10}
+                          {(log.answers_json as unknown as Record<string, string>).Q10}
                         </p>
                       )}
                     </div>
