@@ -173,31 +173,40 @@ export default async function ParentDashboard() {
           </section>
         )}
 
-        {/* 直近の診断結果 */}
+        {/* 過去のレポート */}
         {assessments && assessments.length > 0 && (
           <section>
-            <h3 className="text-lg font-bold text-gray-700 mb-3">チェック履歴</h3>
-            <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-              {(assessments as (DbAssessment & { children: { name: string } | null })[]).map(
-                (a) => (
-                  <Link
-                    key={a.id}
-                    href={`/parent/report/${a.id}`}
-                    className="flex items-center justify-between px-5 py-4 hover:bg-gray-50 border-b last:border-b-0"
-                  >
-                    <div>
-                      <p className="font-medium text-gray-800">
-                        {a.children?.name ?? '—'}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {a.type === 'basic' ? 'くわしいチェック' : 'かんたんチェック'} ·{' '}
-                        {new Date(a.created_at).toLocaleDateString('ja-JP')}
-                      </p>
-                    </div>
-                    <span className="text-[#F7941D] text-sm">レポートを見る →</span>
-                  </Link>
-                )
-              )}
+            <h3 className="text-lg font-bold text-gray-700 mb-3">📄 過去のレポート</h3>
+            <div className="space-y-3">
+              {(assessments as (DbAssessment & { children: { name: string } | null })[]).map((a) => (
+                <Link
+                  key={a.id}
+                  href={`/parent/report/${a.id}`}
+                  className="flex items-center justify-between bg-white rounded-xl shadow-sm p-4 border hover:border-[#F7941D] transition"
+                >
+                  <div>
+                    <p className="font-medium text-gray-800">
+                      {a.children?.name ?? '—'}さんのレポート
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {a.type === 'basic' ? 'くわしいチェック' : 'かんたんチェック'} ·{' '}
+                      {new Date(a.created_at).toLocaleDateString('ja-JP')}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`text-xs px-2 py-1 rounded-full ${
+                        a.payment_status === 'paid'
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-orange-100 text-orange-700'
+                      }`}
+                    >
+                      {a.payment_status === 'paid' ? '閲覧可' : '購入で全表示'}
+                    </span>
+                    <span className="text-[#F7941D] text-sm">見る →</span>
+                  </div>
+                </Link>
+              ))}
             </div>
           </section>
         )}
