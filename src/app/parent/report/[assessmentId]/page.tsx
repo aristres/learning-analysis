@@ -85,6 +85,25 @@ export default async function ReportPage({
     notFound()
   }
 
+  // 支払い確認：basicタイプは paid のみ閲覧可能
+  if (assessment.type === 'basic' && assessment.payment_status !== 'paid') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center p-8 bg-white rounded-2xl shadow max-w-sm mx-4">
+          <p className="text-2xl mb-3">🔒</p>
+          <h2 className="text-lg font-bold text-gray-800 mb-2">レポートの閲覧には購入が必要です</h2>
+          <p className="text-sm text-gray-500 mb-5">くわしいチェック（¥1,480）をご購入ください。</p>
+          <a
+            href="/parent/dashboard"
+            className="block w-full py-2 bg-[#F7941D] text-white rounded-xl text-sm font-medium"
+          >
+            ダッシュボードに戻る
+          </a>
+        </div>
+      </div>
+    )
+  }
+
   const result = assessment.result_json as AssessmentResult | null
   const answersJson = assessment.answers_json as AnswersJson | null
 
