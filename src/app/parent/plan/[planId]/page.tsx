@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import type { PlanJson, DomainKey, StrategySelection } from '@/types'
 import DailyLogButton from '@/components/DailyLogButton'
+import HomeworkAdvisor from '@/components/HomeworkAdvisor'
 
 // =============================================
 // ドメインラベル
@@ -229,6 +230,11 @@ export default async function PlanPage({
               </p>
             )}
           </div>
+        )}
+
+        {/* 宿題アドバイザー */}
+        {childId && (
+          <HomeworkAdvisor planId={planId} childId={childId} grade={grade} />
         )}
 
         {/* 今日のログ記録 */}
