@@ -156,6 +156,41 @@ export default async function PlanPage({
     )
   }
 
+  // 期限切れチェック
+  const todayStr = new Date().toISOString().split('T')[0]
+  const isExpired = plan.end_date ? plan.end_date < todayStr : false
+
+  // 期限切れの場合はロック画面を表示
+  if (isExpired && plan.status !== 'cancelled') {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-white rounded-xl shadow-sm p-10 text-center">
+          <div className="text-5xl mb-4">🔒</div>
+          <h1 className="text-xl font-bold text-[#1B2A4A] mb-2">プランの利用期間が終了しました</h1>
+          <p className="text-gray-500 text-sm mb-2">
+            {plan.type === '30day'
+              ? '1週間お試しプランの期間が終了しました。'
+              : '１ヶ月継続プランの期間が終了しました。'}
+          </p>
+          <p className="text-gray-400 text-xs mb-8">
+            引き続き利用するには、プランを購入してください。
+          </p>
+          <div className="space-y-3">
+            <a
+              href="/parent/payment/plan?type=monthly"
+              className="block px-6 py-3 bg-[#F7941D] text-white rounded-xl font-bold hover:bg-[#E8850F] transition"
+            >
+              １ヶ月継続プランを始める（¥2,450/月）
+            </a>
+            <a href="/parent/dashboard" className="block text-sm text-gray-400 hover:underline">
+              ダッシュボードに戻る
+            </a>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   // 進捗計算
   const startDate = new Date(plan.start_date)
   const today = new Date()

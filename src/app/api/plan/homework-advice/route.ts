@@ -51,6 +51,20 @@ export async function POST(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
 
+    // プランの期限チェック
+    if (planId) {
+      const today = new Date().toISOString().split('T')[0]
+      const { data: plan } = await supabase
+        .from('plans')
+        .select('end_date, status')
+        .eq('id', planId)
+        .eq('parent_id', user.id)
+        .single()
+      if (!plan || plan.status !== 'active' || (plan.end_date && plan.end_date < today)) {
+        return NextResponse.json({ error: 'プランの利用期間が終了しています' }, { status: 403 })
+      }
+    }
+
     // 子どもの学習プロファイルを取得（最新の完了済みアセスメントから）
     let learningProfile: { typeLabel: string; typeDesc: string; subTags: string[] } | null = null
     let reportResult: AssessmentResult | null = null

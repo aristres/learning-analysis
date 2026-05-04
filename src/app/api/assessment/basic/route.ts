@@ -33,8 +33,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
     }
 
-    // アクセス資格チェック：過去の支払い済み診断 OR アクティブプランがあれば無料でフル閲覧可
-    const [{ data: paidAssessment }, { data: activePlan }] = await Promise.all([
+    // アクセス資格チェック：
+    // - 過去に支払い済み診断がある → 診断無料
+    // - アクティブな１ヶ月継続プラン（monthly）がある → 診断無料
+    // ※ 1週間お試し（30day）は診断アクセス権を付与しない
+    const today = new Date().toISOString().split('T')[0]
+    const [{ data: paidAssessment }, { data: activeMonthlyPlan }] = await Promise.all([
       supabase
         .from('assessments')
         .select('id')
@@ -47,10 +51,12 @@ export async function POST(request: NextRequest) {
         .select('id')
         .eq('parent_id', user.id)
         .eq('status', 'active')
+        .eq('type', 'monthly')          // monthly のみ（30day試用は除外）
+        .gte('end_date', today)          // 期限内のみ
         .limit(1)
         .single(),
     ])
-    const isQualified = !!(paidAssessment || activePlan)
+    const isQualified = !!(paidAssessment || activeMonthlyPlan)
     const initialPaymentStatus = isQualified ? 'paid' : 'unpaid'
 
     // スコア計算 + v2 学習タイプ分類

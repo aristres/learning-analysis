@@ -86,9 +86,14 @@ export default async function ReportPage({
     notFound()
   }
 
-  // 資格チェック：この診断が有料 OR 過去に支払い済み OR アクティブプランあり
+  // 資格チェック：
+  // - この診断が有料済み
+  // - 過去に支払い済み診断がある
+  // - アクティブな１ヶ月継続プラン（期限内）がある
+  // ※ 1週間お試しは診断閲覧権を付与しない
   const { data: { user } } = await supabase.auth.getUser()
-  const [{ data: paidAssessment }, { data: activePlan }] = await Promise.all([
+  const today = new Date().toISOString().split('T')[0]
+  const [{ data: paidAssessment }, { data: activeMonthlyPlan }] = await Promise.all([
     supabase
       .from('assessments')
       .select('id')
@@ -101,10 +106,12 @@ export default async function ReportPage({
       .select('id')
       .eq('parent_id', assessment.parent_id)
       .eq('status', 'active')
+      .eq('type', 'monthly')
+      .gte('end_date', today)
       .limit(1)
       .single(),
   ])
-  const isQualified = assessment.payment_status === 'paid' || !!paidAssessment || !!activePlan
+  const isQualified = assessment.payment_status === 'paid' || !!paidAssessment || !!activeMonthlyPlan
 
   // 資格があるのに payment_status が unpaid なら自動で更新
   if (isQualified && assessment.payment_status !== 'paid') {
