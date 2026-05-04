@@ -76,10 +76,36 @@ export default async function PlanPage({
 
   if (!plan) redirect('/parent/dashboard')
 
-  const planJson = plan.plan_json as PlanJson
+  const planJson = plan.plan_json as PlanJson | null
   const child = plan.children as { name: string; grade: string } | null
   const childName = child?.name ?? ''
   const grade = child?.grade ?? ''
+
+  // plan_json がまだ生成されていない場合
+  if (!planJson) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-white rounded-xl shadow-sm p-10 text-center">
+          <div className="text-5xl mb-4">⏳</div>
+          <h1 className="text-xl font-bold text-[#1B2A4A] mb-2">プランを準備中です</h1>
+          <p className="text-gray-500 text-sm mb-6">
+            決済が完了しました。プランの生成には少し時間がかかる場合があります。
+            しばらくしてからページを再読み込みしてください。
+          </p>
+          <a
+            href={`/parent/plan/${planId}`}
+            className="inline-block px-6 py-3 bg-[#F7941D] text-white rounded-lg font-medium hover:bg-[#E8850F] transition mb-4"
+          >
+            再読み込み
+          </a>
+          <br />
+          <a href="/parent/dashboard" className="text-sm text-gray-400 hover:underline">
+            ダッシュボードに戻る
+          </a>
+        </div>
+      </div>
+    )
+  }
 
   const totalStrategies =
     (planJson.continued_strategies?.length ?? 0) +

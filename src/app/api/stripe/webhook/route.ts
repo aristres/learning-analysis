@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createAdminClient } from '@/lib/supabase/server'
+import { generatePlan } from '@/lib/plan-generator'
+import type { AnswersJson, LearningStyle } from '@/types'
+
+function toLegacyLearningStyle(v2Type: string): LearningStyle {
+  if (v2Type === 'visual') return 'visual'
+  if (v2Type === 'auditory') return 'auditory'
+  return 'kinesthetic'
+}
 
 let _stripe: Stripe | null = null
 function getStripe(): Stripe {
@@ -68,33 +76,68 @@ export async function POST(request: NextRequest) {
           .eq('parent_id', userId)
       }
 
-      // 30日プランの支払い完了 → plans を作成
-      if (productType === 'plan_30day' && childId) {
+      // 30日プラン / マンスリーの支払い完了 → plans を作成
+      if ((productType === 'plan_30day' || productType === 'monthly') && childId) {
         const endDate = new Date()
-        endDate.setDate(endDate.getDate() + 30)
+        if (productType === 'plan_30day') {
+          endDate.setDate(endDate.getDate() + 30)
+        } else {
+          endDate.setMonth(endDate.getMonth() + 1)
+        }
+
+        // plan_json を生成するため、最新の完了済みアセスメントを取得
+        let planJson = null
+        try {
+          // assessmentId が渡されていればそれを使い、なければ最新のものを取得
+          let targetAssessmentId = assessmentId
+          if (!targetAssessmentId) {
+            const { data: latestAssessment } = await supabase
+              .from('assessments')
+              .select('id')
+              .eq('child_id', childId)
+              .eq('status', 'completed')
+              .order('created_at', { ascending: false })
+              .limit(1)
+              .single()
+            targetAssessmentId = latestAssessment?.id ?? null
+          }
+
+          if (targetAssessmentId) {
+            const { data: assessment } = await supabase
+              .from('assessments')
+              .select('answers_json, result_json, children(name)')
+              .eq('id', targetAssessmentId)
+              .single()
+
+            if (assessment?.answers_json) {
+              const answersJson = assessment.answers_json as AnswersJson
+              const v2Type = (assessment.result_json as { v2?: { learning_type?: { primary_type?: string } } } | null)
+                ?.v2?.learning_type?.primary_type ?? 'kinesthetic'
+              const learningStyle = toLegacyLearningStyle(v2Type)
+              const childName = (assessment.children as { name: string } | null)?.name ?? ''
+
+              planJson = generatePlan({
+                domains: answersJson.domains,
+                learningStyle,
+                month: 1,
+                effectiveStrategyIds: [],
+                ineffectiveStrategyIds: [],
+                previousStrategyIds: [],
+                childName,
+              })
+            }
+          }
+        } catch (planErr) {
+          console.error('Plan JSON generation failed in webhook:', planErr)
+        }
 
         await supabase.from('plans').insert({
           child_id: childId,
           parent_id: userId,
           assessment_id: assessmentId,
-          type: '30day',
+          type: productType === 'plan_30day' ? '30day' : 'monthly',
           status: 'active',
-          start_date: new Date().toISOString().split('T')[0],
-          end_date: endDate.toISOString().split('T')[0],
-        })
-      }
-
-      // マンスリーの支払い完了 → plans を作成
-      if (productType === 'monthly' && childId) {
-        const endDate = new Date()
-        endDate.setMonth(endDate.getMonth() + 1)
-
-        await supabase.from('plans').insert({
-          child_id: childId,
-          parent_id: userId,
-          assessment_id: assessmentId,
-          type: 'monthly',
-          status: 'active',
+          plan_json: planJson,
           start_date: new Date().toISOString().split('T')[0],
           end_date: endDate.toISOString().split('T')[0],
         })
