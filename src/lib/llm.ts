@@ -3,15 +3,29 @@ import type { AnswersJson, AssessmentResult, LearningTypeResult } from '@/types'
 
 // 遅延初期化：ビルド時ではなく実行時にのみクライアントを生成する
 let _openai: OpenAI | null = null
-function getOpenAI(): OpenAI {
+function getOpenAI(): OpenAI | null {
+  if (!process.env.OPENAI_API_KEY) return null
   if (!_openai) {
     _openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY!,
+      apiKey: process.env.OPENAI_API_KEY,
       timeout: 60_000,
       maxRetries: 2,
     })
   }
   return _openai
+}
+
+// OpenAI未設定時のフォールバックレポート
+const FALLBACK_REPORT: AssessmentResult = {
+  summary: 'お子さんの回答をもとに傾向を分析しました。詳細なAIレポートは準備中です。現在の回答データは保存されており、AIレポート機能が有効になり次第、自動的に生成されます。',
+  strengths: ['自分のペースで取り組む力', '観察力・気づく力', '継続して取り組む姿勢'],
+  weaknesses: ['新しい環境への慣れに時間がかかる傾向', '複数の指示を同時に処理するのが難しい傾向', '疲れると集中が途切れやすい傾向'],
+  risk_situations: ['手順が多いと混乱しやすい傾向がある', 'ざわついた環境では集中しにくい傾向がある', '時間のプレッシャーがあると焦りやすい傾向がある'],
+  home_strategies: ['1つずつ順番に指示する', '静かな学習環境を作る', '短い時間に区切って休憩を入れる'],
+  study_style: {
+    type: '視覚',
+    description: '見て理解するスタイルが合う傾向があります。図や絵を使った説明が効果的です。',
+  },
 }
 
 // =============================================
@@ -49,10 +63,16 @@ export async function generateAssessmentReport(
   answersJson: AnswersJson,
   learningProfile?: LearningTypeResult
 ): Promise<AssessmentResult> {
+  const client = getOpenAI()
+  if (!client) {
+    console.warn('OPENAI_API_KEY not set. Returning fallback report.')
+    return FALLBACK_REPORT
+  }
+
   const prompt = buildAssessmentPrompt(answersJson, learningProfile)
 
   return withRetry(async () => {
-    const completion = await getOpenAI().chat.completions.create({
+    const completion = await client.chat.completions.create({
       model: 'gpt-4o',
       max_tokens: 2048,
       response_format: { type: 'json_object' },
@@ -91,10 +111,20 @@ export async function generateAssessmentReport(
 export async function generateFreeReport(
   answersJson: Partial<AnswersJson>
 ): Promise<Pick<AssessmentResult, 'summary' | 'strengths' | 'home_strategies'>> {
+  const client = getOpenAI()
+  if (!client) {
+    console.warn('OPENAI_API_KEY not set. Returning fallback free report.')
+    return {
+      summary: FALLBACK_REPORT.summary,
+      strengths: FALLBACK_REPORT.strengths,
+      home_strategies: FALLBACK_REPORT.home_strategies,
+    }
+  }
+
   const prompt = buildFreePrompt(answersJson)
 
   return withRetry(async () => {
-    const completion = await getOpenAI().chat.completions.create({
+    const completion = await client.chat.completions.create({
       model: 'gpt-4o-mini',
       max_tokens: 1024,
       response_format: { type: 'json_object' },

@@ -27,7 +27,7 @@ const PLAN_INFO: Record<PlanType, { name: string; price: string; description: st
   },
   monthly: {
     name: 'マンスリープラン',
-    price: '¥2,980/月',
+    price: '¥1,980/月',
     description: '毎月自動更新で、継続的に個別プランを受け取れます。',
     features: [
       '毎月の学習プラン自動生成',

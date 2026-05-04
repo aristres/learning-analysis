@@ -106,7 +106,7 @@ export default function DemoDashboard() {
             </div>
             <div className="bg-white rounded-lg p-4 text-center">
               <div className="font-bold text-gray-800 mb-1">マンスリー</div>
-              <div className="text-2xl font-bold text-[#F7941D] mb-1">¥2,980</div>
+              <div className="text-2xl font-bold text-[#F7941D] mb-1">¥1,980</div>
               <p className="text-xs text-gray-500 mb-3">月額・継続プラン</p>
               <span className="block text-sm py-1.5 bg-gray-300 text-white rounded-lg cursor-not-allowed">
                 購入する

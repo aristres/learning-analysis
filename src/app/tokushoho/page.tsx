@@ -43,7 +43,7 @@ export default function TokushohoPage() {
               <div className="text-gray-800 space-y-1">
                 <p>ベーシック診断: 1,480円（税込）</p>
                 <p>30日学習プラン: 2,450円（税込）</p>
-                <p>マンスリープラン: 2,980円/月（税込）</p>
+                <p>マンスリープラン: 1,980円/月（税込）</p>
               </div>
             </div>
 

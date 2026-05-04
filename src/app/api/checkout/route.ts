@@ -24,7 +24,7 @@ const PRICE_MAP: Record<ProductType, string> = {
 const PRODUCT_NAMES: Record<ProductType, string> = {
   basic_assessment: 'くわしいチェック (1,480円)',
   plan_30day: '30日プラン (2,450円)',
-  monthly: 'マンスリープラン (2,980円/月)',
+  monthly: 'マンスリープラン (1,980円/月)',
 }
 
 export async function POST(request: NextRequest) {
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
           ? 1480
           : productType === 'plan_30day'
           ? 2450
-          : 2980,
+          : 1980,
       currency: 'jpy',
     })
 
