@@ -19,6 +19,8 @@ const ELEMENTARY = [
   { id: 'essay',        label: '作文',      emoji: '🖊️' },
   { id: 'diary',        label: '日記',      emoji: '📔' },
   { id: 'self_study',   label: '自主学習',  emoji: '⭐' },
+  { id: 'ondoku',       label: '音読',      emoji: '🔊' },
+  { id: 'calc_card',   label: '計算カード', emoji: '🃏' },
 ]
 
 const MIDDLE_ONLY = [
