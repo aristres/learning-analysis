@@ -22,6 +22,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
     }
 
+    const { data: ownedChild } = await supabase
+      .from('children')
+      .select('id')
+      .eq('id', childId)
+      .eq('parent_id', user.id)
+      .single()
+
+    if (!ownedChild) {
+      return NextResponse.json({ error: '対象の子ども情報にアクセスできません' }, { status: 403 })
+    }
+
+    if (planId) {
+      const { data: ownedPlan } = await supabase
+        .from('plans')
+        .select('id')
+        .eq('id', planId)
+        .eq('parent_id', user.id)
+        .single()
+
+      if (!ownedPlan) {
+        return NextResponse.json({ error: '対象プランにアクセスできません' }, { status: 403 })
+      }
+    }
+
     // 気分を変換（Q3: 1=元気, 2=ふつう, 3=つかれてる）
     const moodMap = { 1: 'good', 2: 'normal', 3: 'tired' } as const
     const mood = moodMap[answers.Q3 as 1 | 2 | 3] ?? 'normal'
@@ -71,6 +95,18 @@ export async function GET(request: NextRequest) {
 
   if (!user) {
     return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
+  }
+
+
+  const { data: ownedChild } = await supabase
+    .from('children')
+    .select('id')
+    .eq('id', childId)
+    .eq('parent_id', user.id)
+    .single()
+
+  if (!ownedChild) {
+    return NextResponse.json({ error: '対象の子ども情報にアクセスできません' }, { status: 403 })
   }
 
   const { data, error } = await supabase

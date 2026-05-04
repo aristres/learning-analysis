@@ -57,12 +57,17 @@ export async function POST(request: NextRequest) {
 
     const answersJson = assessment.answers_json as AnswersJson
 
-    // 子ども情報を取得
+    // 子ども情報を取得（所有権チェック含む）
     const { data: child } = await supabase
       .from('children')
       .select('name')
       .eq('id', childId)
+      .eq('parent_id', user.id)
       .single()
+
+    if (!child) {
+      return NextResponse.json({ error: '対象の子ども情報にアクセスできません' }, { status: 403 })
+    }
 
     // 既存プランを確認（月数と前回の手立て情報取得）
     const { data: existingPlans } = await supabase

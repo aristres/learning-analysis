@@ -7,6 +7,12 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get('code')
   const next = searchParams.get('next') ?? '/parent/dashboard'
 
+  const isSafeNext =
+    next.startsWith('/') &&
+    !next.startsWith('//') &&
+    !next.startsWith('/\\')
+  const safeNext = isSafeNext ? next : '/parent/dashboard'
+
   if (code) {
     const cookieStore = await cookies()
     const supabase = createServerClient(
@@ -29,7 +35,7 @@ export async function GET(request: NextRequest) {
     const { error } = await supabase.auth.exchangeCodeForSession(code)
 
     if (!error) {
-      return NextResponse.redirect(`${origin}${next}`)
+      return NextResponse.redirect(`${origin}${safeNext}`)
     }
   }
 

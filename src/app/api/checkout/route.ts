@@ -20,13 +20,6 @@ const PRICE_MAP: Record<ProductType, string> = {
   monthly: process.env.STRIPE_PRICE_MONTHLY!,
 }
 
-// 商品名マッピング（日本語）
-const PRODUCT_NAMES: Record<ProductType, string> = {
-  basic_assessment: 'くわしいチェック (1,480円)',
-  plan_30day: '30日プラン (2,450円)',
-  monthly: 'マンスリープラン (1,980円/月)',
-}
-
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -45,6 +38,17 @@ export async function POST(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
+    }
+
+    const { data: ownedChild } = await supabase
+      .from('children')
+      .select('id')
+      .eq('id', childId)
+      .eq('parent_id', user.id)
+      .single()
+
+    if (!ownedChild) {
+      return NextResponse.json({ error: '対象の子ども情報にアクセスできません' }, { status: 403 })
     }
 
     // 既存の Stripe customer ID を取得

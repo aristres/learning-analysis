@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { calcBasicAnswersJson, classifyLearningProfile } from '@/lib/scoring'
 import { generateAssessmentReport } from '@/lib/llm'
 import { generatePlan } from '@/lib/plan-generator'
-import type { AnswersJson, LearningStyle } from '@/types'
+import type { LearningStyle } from '@/types'
 
 /** プラン生成用: v2タイプ → LearningStyle (後方互換マッピング) */
 function toLegacyLearningStyle(v2Type: string): LearningStyle {
@@ -31,6 +31,17 @@ export async function POST(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
+    }
+
+    const { data: ownedChild } = await supabase
+      .from('children')
+      .select('id')
+      .eq('id', childId)
+      .eq('parent_id', user.id)
+      .single()
+
+    if (!ownedChild) {
+      return NextResponse.json({ error: '対象の子ども情報にアクセスできません' }, { status: 403 })
     }
 
     // 支払い済みかチェック（assessmentId がある場合）
@@ -121,6 +132,7 @@ export async function POST(request: NextRequest) {
           .from('children')
           .select('name')
           .eq('id', childId)
+          .eq('parent_id', user.id)
           .single()
 
         const learningStyle = toLegacyLearningStyle(learningProfile.primary_type)
