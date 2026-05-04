@@ -33,19 +33,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
     }
 
-    // 支払い済みサブスクリプションを確認
-    const { data: subscription } = await supabase
-      .from('subscriptions')
-      .select('id, status')
-      .eq('user_id', user.id)
-      .eq('product_type', 'basic_assessment')
-      .eq('status', 'active')
-      .limit(1)
-      .maybeSingle()
-
-    if (!subscription) {
-      return NextResponse.json({ error: '決済が完了していません。くわしいチェックをご購入ください。' }, { status: 403 })
-    }
+    // 支払いは不要（レポート生成は無料、閲覧時に一部ロック）
 
     // スコア計算 + v2 学習タイプ分類
     const answersJson = calcBasicAnswersJson(rawAnswers, grade)
@@ -62,7 +50,7 @@ export async function POST(request: NextRequest) {
           parent_id: user.id,
           type: 'basic',
           status: 'in_progress',
-          payment_status: 'paid',
+          payment_status: 'unpaid',
           answers_json: answersJson,
         })
         .select('id')

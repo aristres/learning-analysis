@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import type { AssessmentResult, AnswersJson, SubTag } from '@/types'
 import Link from 'next/link'
+import PaywallButton from '@/components/PaywallButton'
 
 const DOMAIN_LABELS: Record<string, string> = {
   attention: '集中のしやすさ',
@@ -85,24 +86,7 @@ export default async function ReportPage({
     notFound()
   }
 
-  // 支払い確認：basicタイプは paid のみ閲覧可能
-  if (assessment.type === 'basic' && assessment.payment_status !== 'paid') {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center p-8 bg-white rounded-2xl shadow max-w-sm mx-4">
-          <p className="text-2xl mb-3">🔒</p>
-          <h2 className="text-lg font-bold text-gray-800 mb-2">レポートの閲覧には購入が必要です</h2>
-          <p className="text-sm text-gray-500 mb-5">くわしいチェック（¥1,480）をご購入ください。</p>
-          <a
-            href="/parent/dashboard"
-            className="block w-full py-2 bg-[#F7941D] text-white rounded-xl text-sm font-medium"
-          >
-            ダッシュボードに戻る
-          </a>
-        </div>
-      </div>
-    )
-  }
+  const isPaid = assessment.payment_status === 'paid'
 
   const result = assessment.result_json as AssessmentResult | null
   const answersJson = assessment.answers_json as AnswersJson | null
@@ -177,6 +161,68 @@ export default async function ReportPage({
           <h2 className="text-lg font-bold text-gray-800 mb-3">お子さんの特徴</h2>
           <p className="text-gray-700 leading-relaxed">{result.summary}</p>
         </div>
+
+        {/* ペイウォール（未払いの場合） */}
+        {!isPaid && (
+          <div className="relative">
+            {/* ぼかしプレビュー */}
+            <div className="blur-sm pointer-events-none select-none space-y-6">
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <h2 className="text-lg font-bold text-gray-800 mb-4">領域別の傾向</h2>
+                <div className="space-y-3">
+                  {['集中のしやすさ','手順の記憶','作業スピード','やる気・気持ち'].map((label) => (
+                    <div key={label}>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-sm text-gray-700">{label}</span>
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">標準的</span>
+                      </div>
+                      <div className="w-full bg-gray-100 rounded-full h-2">
+                        <div className="bg-blue-400 h-2 rounded-full" style={{ width: '55%' }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <h2 className="text-lg font-bold text-gray-800 mb-3">強み</h2>
+                <ul className="space-y-2">
+                  <li className="flex items-start gap-2"><span className="text-[#43A047] font-bold">✓</span><span className="text-gray-700">xxxxxxxxxxxxxxxxxxxxxxxxxx</span></li>
+                  <li className="flex items-start gap-2"><span className="text-[#43A047] font-bold">✓</span><span className="text-gray-700">xxxxxxxxxxxxxxxxxxxxxxxxxx</span></li>
+                  <li className="flex items-start gap-2"><span className="text-[#43A047] font-bold">✓</span><span className="text-gray-700">xxxxxxxxxxxxxxxxxxxxxxxxxx</span></li>
+                </ul>
+              </div>
+              <div className="bg-green-50 rounded-xl shadow-sm p-6 border border-green-200">
+                <h2 className="text-lg font-bold text-green-800 mb-3">今日から使える手立て</h2>
+                <ul className="space-y-2">
+                  <li className="flex items-start gap-2"><span className="text-green-600 font-bold">→</span><span className="text-gray-700">xxxxxxxxxxxxxxxxxxxxxxxxxx</span></li>
+                  <li className="flex items-start gap-2"><span className="text-green-600 font-bold">→</span><span className="text-gray-700">xxxxxxxxxxxxxxxxxxxxxxxxxx</span></li>
+                </ul>
+              </div>
+            </div>
+
+            {/* オーバーレイ */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/70 rounded-xl">
+              <div className="bg-white rounded-2xl shadow-xl p-8 mx-4 max-w-sm w-full text-center border border-gray-100">
+                <p className="text-3xl mb-3">🔒</p>
+                <h3 className="text-xl font-bold text-gray-800 mb-2">続きを見るには購入が必要です</h3>
+                <p className="text-sm text-gray-500 mb-2">領域別の傾向・強み・手立てなど<br />詳細レポートの全項目が閲覧できます</p>
+                <div className="bg-[#FFF8F0] rounded-lg p-3 mb-5 text-left space-y-1">
+                  <p className="text-xs text-gray-600">✓ 領域別スコアと傾向グラフ</p>
+                  <p className="text-xs text-gray-600">✓ 強み・のびしろ詳細分析</p>
+                  <p className="text-xs text-gray-600">✓ 家庭でできる手立て3選</p>
+                  <p className="text-xs text-gray-600">✓ 算数・国語の個別アドバイス</p>
+                </div>
+                <PaywallButton
+                  assessmentId={assessmentId}
+                  childId={assessment.child_id}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 以下は支払い済みのみ表示 */}
+        {isPaid && <>
 
         {/* 領域別の傾向（スコア数値なし） */}
         {answersJson && (
@@ -316,18 +362,13 @@ export default async function ReportPage({
           </div>
         )}
 
-        {/* CTA */}
-        {assessment.type === 'free' && (
-          <div className="bg-white rounded-xl shadow-sm p-6 text-center border-2 border-[#F7941D]/30">
-            <p className="text-gray-600 mb-2">より詳しい分析・家庭学習プランはこちら</p>
-            <Link
-              href="/signup"
-              className="inline-block px-8 py-3 bg-[#F7941D] text-white rounded-lg font-medium hover:bg-[#E8850F] transition"
-            >
-              くわしいチェックへ（¥1,480）
-            </Link>
-          </div>
-        )}
+        <div className="text-center pb-8">
+          <Link href="/parent/dashboard" className="text-[#F7941D] hover:underline text-sm">
+            ダッシュボードへ戻る
+          </Link>
+        </div>
+
+        </> /* isPaid end */}
 
         <div className="text-center pb-8">
           <Link href="/parent/dashboard" className="text-[#F7941D] hover:underline text-sm">
