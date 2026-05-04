@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
       if ((productType === 'plan_30day' || productType === 'monthly') && childId) {
         const endDate = new Date()
         if (productType === 'plan_30day') {
-          endDate.setDate(endDate.getDate() + 30)
+          endDate.setDate(endDate.getDate() + 7)  // 1週間お試しプラン
         } else {
           endDate.setMonth(endDate.getMonth() + 1)
         }

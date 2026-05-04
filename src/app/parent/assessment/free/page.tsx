@@ -103,6 +103,7 @@ export default function FreeAssessmentPage() {
     strengths: string[]
     home_strategies: string[]
   } | null>(null)
+  const [answersJson, setAnswersJson] = useState<Record<string, unknown> | null>(null)
   const [error, setError] = useState('')
 
   const progress = currentStep === 0 ? 0 : (currentStep / TOTAL_QUESTIONS) * 100
@@ -173,6 +174,7 @@ export default function FreeAssessmentPage() {
 
       const data = await res.json()
       setResult(data.result)
+      setAnswersJson(data.answersJson ?? null)
       setCurrentStep(TOTAL_QUESTIONS + 2) // result
     } catch (err) {
       setError(err instanceof Error ? err.message : '予期しないエラーが発生しました')
@@ -193,68 +195,166 @@ export default function FreeAssessmentPage() {
 
   // ── Result ──
   if (currentStep === TOTAL_QUESTIONS + 2 && result) {
+    const domains = (answersJson as { domains?: Record<string, { score: number; level: string }> } | null)?.domains
+    const domainLabels: Record<string, string> = {
+      attention: '集中のしやすさ',
+      working_memory: '手順の記憶',
+      processing_speed: '作業スピード',
+      motivation_emotion: 'やる気・気持ち',
+      study_habits: '学習習慣',
+      sensory: '感覚の特徴',
+      math_calculation: '算数・計算',
+      kanji_literacy: '国語・漢字',
+    }
+    const domainKeys = Object.keys(domainLabels)
+    const hiddenStrengthCount = Math.max(0, (result.strengths?.length ?? 0) - 1)
+
     return (
       <div className="min-h-screen bg-[#F8FAFC] py-10 px-4">
-        <div className="max-w-2xl mx-auto">
-          <div className="bg-white rounded-2xl shadow-lg p-8 mb-6 animate-fade-in">
-            <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#FFF8F0] mb-4">
-                <span className="text-3xl">📊</span>
-              </div>
-              <h1 className="text-2xl font-bold text-[#1B2A4A] mb-1">かんたんチェックレポート</h1>
-              <p className="text-gray-500 text-sm">{childName}さん（{grade}）</p>
+        <div className="max-w-2xl mx-auto space-y-4 animate-fade-in">
+
+          {/* ヘッダー */}
+          <div className="bg-white rounded-2xl shadow-sm p-6 text-center">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-[#FFF8F0] mb-3">
+              <span className="text-3xl">📊</span>
             </div>
+            <h1 className="text-xl font-bold text-[#1B2A4A] mb-1">かんたんチェック結果</h1>
+            <p className="text-gray-400 text-sm">{childName}さん（{grade}）</p>
+          </div>
 
-            <section className="mb-8">
-              <h2 className="text-lg font-bold text-[#1B2A4A] mb-3 flex items-center gap-2">
-                <span className="w-1 h-6 bg-[#F7941D] rounded-full" />
-                お子さんの特徴
-              </h2>
-              <p className="text-gray-700 leading-relaxed">{result.summary}</p>
-            </section>
+          {/* 特徴サマリー（冒頭のみ） */}
+          <div className="bg-white rounded-2xl shadow-sm p-6">
+            <h2 className="text-base font-bold text-[#1B2A4A] mb-3 flex items-center gap-2">
+              <span className="w-1 h-5 bg-[#F7941D] rounded-full" />
+              お子さんの特徴（一部）
+            </h2>
+            <p className="text-gray-700 leading-relaxed text-sm">
+              {result.summary.length > 80
+                ? result.summary.slice(0, 80) + '…'
+                : result.summary}
+            </p>
+            <p className="text-xs text-[#F7941D] mt-2 font-medium">
+              🔒 続きはくわしいチェックで確認できます
+            </p>
+          </div>
 
-            <section className="mb-8">
-              <h2 className="text-lg font-bold text-[#1B2A4A] mb-3 flex items-center gap-2">
-                <span className="w-1 h-6 bg-[#43A047] rounded-full" />
-                強み
-              </h2>
-              <ul className="space-y-2">
-                {result.strengths.map((s, i) => (
-                  <li key={i} className="flex items-start gap-2">
-                    <span className="text-[#43A047] mt-1 font-bold">✓</span>
-                    <span className="text-gray-700">{s}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
+          {/* 強み（1個だけ表示、残りはロック） */}
+          <div className="bg-white rounded-2xl shadow-sm p-6">
+            <h2 className="text-base font-bold text-[#1B2A4A] mb-3 flex items-center gap-2">
+              <span className="w-1 h-5 bg-green-500 rounded-full" />
+              見つかった強み
+            </h2>
+            {result.strengths?.[0] && (
+              <div className="flex items-start gap-2 mb-3">
+                <span className="text-green-500 font-bold mt-0.5">✓</span>
+                <span className="text-gray-700 text-sm">{result.strengths[0]}</span>
+              </div>
+            )}
+            {hiddenStrengthCount > 0 && (
+              <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-4 py-3 border border-dashed border-gray-200">
+                <span className="text-xl">🔒</span>
+                <p className="text-sm text-gray-400">
+                  他に <span className="font-bold text-gray-500">{hiddenStrengthCount}個</span> の強みが見つかりました
+                </p>
+              </div>
+            )}
+          </div>
 
-            <section className="mb-8">
-              <h2 className="text-lg font-bold text-[#1B2A4A] mb-3 flex items-center gap-2">
-                <span className="w-1 h-6 bg-[#2196F3] rounded-full" />
-                すぐ使える手立て
-              </h2>
-              <ul className="space-y-2">
-                {result.home_strategies.map((s, i) => (
-                  <li key={i} className="flex items-start gap-2">
-                    <span className="text-[#2196F3] mt-1">●</span>
-                    <span className="text-gray-700">{s}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
+          {/* 手立て（完全ロック） */}
+          <div className="bg-white rounded-2xl shadow-sm p-6">
+            <h2 className="text-base font-bold text-[#1B2A4A] mb-3 flex items-center gap-2">
+              <span className="w-1 h-5 bg-blue-400 rounded-full" />
+              家庭でできる手立て
+            </h2>
+            <div className="space-y-2">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3">
+                  <span className="text-lg">🔒</span>
+                  <div className="flex-1 h-3 bg-gray-200 rounded-full" />
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-center text-gray-400 mt-3">
+              くわしいチェックで{result.home_strategies?.length ?? 3}個の具体的な手立てを確認できます
+            </p>
+          </div>
 
-            <div className="border-t border-gray-100 pt-6 text-center">
-              <p className="text-gray-500 text-sm mb-4">
-                より詳しい分析・家庭学習プランは「くわしいチェック」で
-              </p>
-              <a
-                href="/signup"
-                className="inline-block px-8 py-3 bg-[#F7941D] text-white rounded-full font-medium hover:bg-[#E8850F] transition shadow-md"
-              >
-                くわしいチェックへ（¥1,480）
-              </a>
+          {/* ドメインスコア（すべて伏字） */}
+          <div className="bg-white rounded-2xl shadow-sm p-6">
+            <h2 className="text-base font-bold text-[#1B2A4A] mb-1 flex items-center gap-2">
+              <span className="w-1 h-5 bg-purple-400 rounded-full" />
+              8領域の学習特性スコア
+            </h2>
+            <p className="text-xs text-gray-400 mb-4">くわしいチェックで数値が開示されます</p>
+            <div className="space-y-3">
+              {domainKeys.map((key) => (
+                <div key={key}>
+                  <div className="flex justify-between text-xs text-gray-500 mb-1">
+                    <span>{domainLabels[key]}</span>
+                    <span className="font-bold text-gray-300">??</span>
+                  </div>
+                  <div className="w-full bg-gray-100 rounded-full h-2.5 relative overflow-hidden">
+                    {/* ぼかしたバー */}
+                    <div
+                      className="h-2.5 rounded-full bg-gray-300 blur-sm"
+                      style={{ width: `${domains?.[key]?.score ?? 50}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
+
+          {/* 教科別アドバイス（完全ロック） */}
+          <div className="bg-white rounded-2xl shadow-sm p-6">
+            <h2 className="text-base font-bold text-[#1B2A4A] mb-3 flex items-center gap-2">
+              <span className="w-1 h-5 bg-orange-400 rounded-full" />
+              教科別アドバイス
+            </h2>
+            <div className="grid grid-cols-2 gap-3">
+              {['算数・計算', '国語・漢字'].map((subject) => (
+                <div key={subject} className="bg-gray-50 rounded-xl p-4 text-center border border-dashed border-gray-200">
+                  <p className="text-xs font-medium text-gray-400 mb-2">{subject}</p>
+                  <div className="space-y-1.5">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="h-2 bg-gray-200 rounded-full mx-2" />
+                    ))}
+                  </div>
+                  <p className="text-lg mt-2">🔒</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="bg-gradient-to-br from-[#1B2A4A] to-[#2B4BAF] rounded-2xl p-6 text-white text-center">
+            <p className="text-white/70 text-xs mb-1">ここまで見えました</p>
+            <h3 className="text-lg font-bold mb-1">全項目を見るには</h3>
+            <p className="text-sm text-white/80 mb-4">
+              くわしいチェックでスコア・手立て・教科別アドバイスをすべて解放
+            </p>
+            <div className="bg-white/10 rounded-xl p-3 mb-4 text-left space-y-1.5">
+              {[
+                '8領域の詳細スコアを数値で確認',
+                `残り${hiddenStrengthCount}個の強みを確認`,
+                `${result.home_strategies?.length ?? 3}個の具体的な手立て`,
+                '算数・国語それぞれのアドバイス',
+                'お子さんの学習タイプ診断（6タイプ）',
+              ].map((item, i) => (
+                <p key={i} className="text-xs text-white/90 flex items-center gap-2">
+                  <span className="text-[#F7941D]">✓</span>{item}
+                </p>
+              ))}
+            </div>
+            <a
+              href="/signup"
+              className="block w-full py-3 bg-[#F7941D] text-white rounded-xl font-bold text-base hover:bg-[#E8850F] transition shadow-md"
+            >
+              くわしいチェックを始める（¥1,480）
+            </a>
+            <p className="text-xs text-white/50 mt-2">買い切り・返金対応あり</p>
+          </div>
+
         </div>
       </div>
     )
