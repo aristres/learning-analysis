@@ -114,7 +114,8 @@ export async function POST(request: NextRequest) {
               const v2Type = (assessment.result_json as { v2?: { learning_type?: { primary_type?: string } } } | null)
                 ?.v2?.learning_type?.primary_type ?? 'kinesthetic'
               const learningStyle = toLegacyLearningStyle(v2Type)
-              const childName = (assessment.children as { name: string } | null)?.name ?? ''
+              const childrenRaw = assessment.children as unknown as { name: string } | { name: string }[] | null
+              const childName = (Array.isArray(childrenRaw) ? childrenRaw[0]?.name : childrenRaw?.name) ?? ''
 
               planJson = generatePlan({
                 domains: answersJson.domains,
