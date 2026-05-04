@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import type { DbChild, DbAssessment, DbPlan } from '@/types'
 import PlanCancelButton from '@/components/PlanCancelButton'
+import PlanDetailModal from '@/components/PlanDetailModal'
 
 export default async function ParentDashboard() {
   const supabase = await createClient()
@@ -107,41 +108,50 @@ export default async function ParentDashboard() {
 
         {/* 料金プラン CTA */}
         <section className="bg-[#FFF8F0] rounded-xl p-6 border border-[#F7941D]/20">
-          <h3 className="text-lg font-bold text-[#1B2A4A] mb-2">プランをアップグレード</h3>
+          <h3 className="text-lg font-bold text-[#1B2A4A] mb-1">プランを選ぶ</h3>
+          <p className="text-xs text-gray-500 mb-4">各プランの「詳しく見る」で機能の詳細を確認できます</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="bg-white rounded-lg p-4 text-center">
-              <div className="font-bold text-gray-800 mb-1">くわしいチェック</div>
-              <div className="text-2xl font-bold text-[#F7941D] mb-1">¥1,480</div>
-              <p className="text-xs text-gray-500 mb-3">20問・詳細レポート</p>
-              <Link
-                href="/parent/assessment/basic"
-                className="block text-sm py-1.5 bg-[#F7941D] text-white rounded-lg hover:bg-[#E8850F]"
-              >
-                チェックする
-              </Link>
+
+            {/* くわしいチェック */}
+            <div className="bg-white rounded-xl p-4 border flex flex-col">
+              <div className="font-bold text-gray-800 mb-0.5">くわしいチェック</div>
+              <div className="text-xl font-bold text-[#F7941D] mb-1">¥1,480</div>
+              <p className="text-xs text-gray-400 mb-1">買い切り</p>
+              <p className="text-xs text-gray-500 mb-4 flex-1">学習特性の詳細診断＋個別レポート生成</p>
+              <PlanDetailModal planKey="basic_assessment" trigger={
+                <button className="w-full text-sm py-2 bg-[#F7941D] text-white rounded-lg hover:bg-[#E8850F] transition">
+                  詳しく見る
+                </button>
+              } />
             </div>
-            <div className="bg-white rounded-lg p-4 text-center border-2 border-[#F7941D]">
-              <div className="font-bold text-gray-800 mb-1">30日プラン</div>
-              <div className="text-2xl font-bold text-[#F7941D] mb-1">¥2,450</div>
-              <p className="text-xs text-gray-500 mb-3">週別メニュー・日次ログ</p>
-              <Link
-                href="/parent/payment/plan?type=plan_30day"
-                className="block text-sm py-1.5 bg-[#F7941D] text-white rounded-lg hover:bg-[#E8850F]"
-              >
-                購入する
-              </Link>
+
+            {/* 1週間お試し */}
+            <div className="bg-white rounded-xl p-4 border flex flex-col">
+              <div className="font-bold text-gray-800 mb-0.5">1週間お試し</div>
+              <div className="text-xl font-bold text-[#F7941D] mb-1">¥980</div>
+              <p className="text-xs text-gray-400 mb-1">7日間限定・自動継続なし</p>
+              <p className="text-xs text-gray-500 mb-4 flex-1">マンスリーの全機能を1週間体験できます</p>
+              <PlanDetailModal planKey="plan_30day" trigger={
+                <button className="w-full text-sm py-2 border border-[#F7941D] text-[#F7941D] rounded-lg hover:bg-[#FFF8F0] transition">
+                  詳しく見る
+                </button>
+              } />
             </div>
-            <div className="bg-white rounded-lg p-4 text-center">
-              <div className="font-bold text-gray-800 mb-1">マンスリー</div>
-              <div className="text-2xl font-bold text-[#F7941D] mb-1">¥1,980</div>
-              <p className="text-xs text-gray-500 mb-3">月額・継続プラン</p>
-              <Link
-                href="/parent/payment/plan?type=monthly"
-                className="block text-sm py-1.5 bg-[#F7941D] text-white rounded-lg hover:bg-[#E8850F]"
-              >
-                購入する
-              </Link>
+
+            {/* マンスリー */}
+            <div className="bg-white rounded-xl p-4 border-2 border-[#F7941D] flex flex-col relative">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#F7941D] text-white text-xs font-bold px-3 py-0.5 rounded-full">おすすめ</div>
+              <div className="font-bold text-gray-800 mb-0.5">１ヶ月継続プラン</div>
+              <div className="text-xl font-bold text-[#F7941D] mb-1">¥2,450<span className="text-sm font-normal">/月</span></div>
+              <p className="text-xs text-gray-400 mb-1">毎月自動更新</p>
+              <p className="text-xs text-gray-500 mb-4 flex-1">AIアドバイス＋毎月プラン更新で継続サポート</p>
+              <PlanDetailModal planKey="monthly" trigger={
+                <button className="w-full text-sm py-2 bg-[#F7941D] text-white rounded-lg hover:bg-[#E8850F] transition">
+                  詳しく見る
+                </button>
+              } />
             </div>
+
           </div>
         </section>
 
@@ -158,7 +168,7 @@ export default async function ParentDashboard() {
                   >
                     <div className="flex items-center justify-between mb-2">
                       <p className="font-bold text-gray-800">
-                        {p.children?.name ?? '—'}の{p.type === '30day' ? '30日' : 'マンスリー'}プラン
+                        {p.children?.name ?? '—'}の{p.type === '30day' ? '1週間お試し' : '１ヶ月継続'}プラン
                       </p>
                       <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full">
                         実施中

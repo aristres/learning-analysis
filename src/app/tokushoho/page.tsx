@@ -42,8 +42,8 @@ export default function TokushohoPage() {
               <h2 className="text-sm font-medium text-gray-500 mb-1">販売価格</h2>
               <div className="text-gray-800 space-y-1">
                 <p>ベーシック診断: 1,480円（税込）</p>
-                <p>30日学習プラン: 2,450円（税込）</p>
-                <p>マンスリープラン: 1,980円/月（税込）</p>
+                <p>1週間お試しプラン: 980円（税込）</p>
+                <p>１ヶ月継続プラン: 2,450円/月（税込）</p>
               </div>
             </div>
 
@@ -65,7 +65,7 @@ export default function TokushohoPage() {
               <h2 className="text-sm font-medium text-gray-500 mb-1">支払時期</h2>
               <p className="text-gray-800">
                 ご注文時にお支払いが確定します。
-                マンスリープランは毎月同日に自動課金されます。
+                １ヶ月継続プランは毎月同日に自動課金されます。
               </p>
             </div>
 
@@ -89,7 +89,7 @@ export default function TokushohoPage() {
             <div className="border-b border-gray-100 pb-4">
               <h2 className="text-sm font-medium text-gray-500 mb-1">解約について</h2>
               <p className="text-gray-800">
-                マンスリープランの解約は、マイページより次回請求日の前日までにお手続きください。
+                １ヶ月継続プランの解約は、マイページより次回請求日の前日までにお手続きください。
                 解約後も、現在の請求期間の終了まではサービスをご利用いただけます。
               </p>
             </div>

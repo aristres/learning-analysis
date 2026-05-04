@@ -61,7 +61,7 @@ export default function TermsPage() {
               <ul className="list-disc list-inside text-gray-700 space-y-1 mt-2">
                 <li>決済完了後のキャンセル・返金は原則として行いません</li>
                 <li>サービスの不具合によりレポートが生成されなかった場合は、再生成または返金で対応いたします</li>
-                <li>マンスリープランの解約は、次回請求日の前日までに行ってください</li>
+                <li>１ヶ月継続プランの解約は、次回請求日の前日までに行ってください</li>
               </ul>
             </section>
 

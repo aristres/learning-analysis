@@ -172,9 +172,9 @@ export default function HomePage() {
             </div>
 
             <div className="bg-white rounded-2xl shadow-md p-6 text-center border border-gray-100">
-              <div className="text-[#F7941D] font-bold text-lg mb-2">30日プラン</div>
-              <div className="text-4xl font-bold text-[#1B2A4A] mb-2">¥2,450</div>
-              <p className="text-gray-500 text-sm mb-6">週別メニュー・日次ログ</p>
+              <div className="text-[#F7941D] font-bold text-lg mb-2">１ヶ月継続プラン</div>
+              <div className="text-4xl font-bold text-[#1B2A4A] mb-2">¥2,450<span className="text-lg font-normal">/月</span></div>
+              <p className="text-gray-500 text-sm mb-6">週別メニュー・AIアドバイス・日次ログ</p>
               <Link
                 href="/signup"
                 className="block w-full py-3 rounded-full border-2 border-[#F7941D] text-[#F7941D] font-medium hover:bg-[#FFF8F0] transition"
@@ -199,7 +199,7 @@ export default function HomePage() {
                     <span className="text-[#F7941D]">ベーシック</span>
                   </th>
                   <th className="py-3 px-3 text-center text-[#1B2A4A] font-semibold border-b-2 border-gray-200 w-1/5">
-                    30日
+                    継続プラン
                   </th>
                 </tr>
               </thead>

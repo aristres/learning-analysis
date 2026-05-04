@@ -41,7 +41,7 @@ function getEncouragement(dayNumber: number): { message: string; emoji: string }
   if (dayNumber <= 14) return { emoji: '✨', message: '1週間達成！お子さんのペースをつかんできた頃ですね。' }
   if (dayNumber <= 21) return { emoji: '💪', message: '折り返し地点！ここまで来たら後半も大丈夫です。' }
   if (dayNumber <= 28) return { emoji: '🌟', message: 'もう少しでゴールです！最後まで一緒に走り切りましょう。' }
-  return { emoji: '🎉', message: '30日プラン達成おめでとうございます！素晴らしい取り組みでした。' }
+  return { emoji: '🎉', message: 'プラン達成おめでとうございます！素晴らしい取り組みでした。' }
 }
 
 // =============================================
@@ -162,7 +162,7 @@ export default async function PlanPage({
   today.setHours(0, 0, 0, 0)
   startDate.setHours(0, 0, 0, 0)
   const dayNumber = Math.max(1, Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1)
-  const totalDays = 30
+  const totalDays = plan.type === '30day' ? 7 : 30
   const progressPercent = Math.min(100, Math.round((dayNumber / totalDays) * 100))
   const weekNumber = Math.min(4, Math.ceil(dayNumber / 7))
   const currentWeek = planJson.weeks?.find(w => w.week === weekNumber)
@@ -188,8 +188,8 @@ export default async function PlanPage({
         <div className="bg-gradient-to-br from-[#2B4BAF] to-[#3D6DD4] text-white rounded-2xl p-6">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <p className="text-white/70 text-sm">30日プラン</p>
-              <p className="text-2xl font-bold">{dayNumber}日目 <span className="text-base font-normal text-white/70">/ 30日</span></p>
+              <p className="text-white/70 text-sm">{plan.type === '30day' ? '1週間お試しプラン' : '１ヶ月継続プラン'}</p>
+              <p className="text-2xl font-bold">{dayNumber}日目 <span className="text-base font-normal text-white/70">/ {totalDays}日</span></p>
             </div>
             <div className="text-4xl">{encouragement.emoji}</div>
           </div>

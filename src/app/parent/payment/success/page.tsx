@@ -12,9 +12,9 @@ export default async function PaymentSuccessPage({
     productType === 'basic_assessment'
       ? 'くわしいチェックの購入が完了しました'
       : productType === 'plan_30day'
-      ? '30日プランの購入が完了しました'
+      ? '1週間お試しプランの購入が完了しました'
       : productType === 'monthly'
-      ? 'マンスリープランの購入が完了しました'
+      ? '１ヶ月継続プランの購入が完了しました'
       : 'お支払いが完了しました'
 
   const nextHref =
