@@ -17,12 +17,13 @@ export default async function ParentDashboard() {
     .eq('parent_id', user.id)
     .order('created_at', { ascending: true })
 
-  // 直近の診断
+  // 直近の診断（有料購入済みのみ表示）
   const { data: assessments } = await supabase
     .from('assessments')
     .select('*, children(name)')
     .eq('parent_id', user.id)
     .eq('status', 'completed')
+    .eq('payment_status', 'paid')
     .order('created_at', { ascending: false })
     .limit(5)
 
