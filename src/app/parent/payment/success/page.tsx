@@ -18,12 +18,12 @@ export default async function PaymentSuccessPage({
       : 'お支払いが完了しました'
 
   const nextHref =
-    productType === 'basic_assessment' && assessmentId
-      ? `/parent/assessment/basic?assessmentId=${assessmentId}&childId=${childId ?? ''}`
+    productType === 'basic_assessment'
+      ? `/parent/assessment/basic?childId=${childId ?? ''}&paid=1`
       : '/parent/dashboard'
 
   const nextLabel =
-    productType === 'basic_assessment' ? 'チェックを完了する' : 'ダッシュボードへ'
+    productType === 'basic_assessment' ? 'チェックを始める' : 'ダッシュボードへ'
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">

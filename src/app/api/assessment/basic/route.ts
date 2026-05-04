@@ -33,18 +33,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
     }
 
-    // 支払い済みかチェック（assessmentId がある場合）
-    if (assessmentId) {
-      const { data: existingAssessment } = await supabase
-        .from('assessments')
-        .select('payment_status')
-        .eq('id', assessmentId)
-        .eq('parent_id', user.id)
-        .single()
+    // 支払い済みサブスクリプションを確認
+    const { data: subscription } = await supabase
+      .from('subscriptions')
+      .select('id, status')
+      .eq('user_id', user.id)
+      .eq('product_type', 'basic_assessment')
+      .eq('status', 'active')
+      .limit(1)
+      .maybeSingle()
 
-      if (!existingAssessment || existingAssessment.payment_status !== 'paid') {
-        return NextResponse.json({ error: '決済が完了していません' }, { status: 403 })
-      }
+    if (!subscription) {
+      return NextResponse.json({ error: '決済が完了していません。くわしいチェックをご購入ください。' }, { status: 403 })
     }
 
     // スコア計算 + v2 学習タイプ分類
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
           parent_id: user.id,
           type: 'basic',
           status: 'in_progress',
-          payment_status: 'unpaid',
+          payment_status: 'paid',
           answers_json: answersJson,
         })
         .select('id')

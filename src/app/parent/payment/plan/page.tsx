@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 
-type PlanType = 'plan_30day' | 'monthly'
+type PlanType = 'basic_assessment' | 'plan_30day' | 'monthly'
 
 interface Child {
   id: string
@@ -14,6 +14,18 @@ interface Child {
 }
 
 const PLAN_INFO: Record<PlanType, { name: string; price: string; description: string; features: string[] }> = {
+  basic_assessment: {
+    name: 'くわしいチェック',
+    price: '¥1,480',
+    description: '20問の質問でお子さんの学習特性を詳しく分析し、個別レポートを生成します。',
+    features: [
+      '20問の詳細チェック',
+      '学習タイプ診断（6タイプ分類）',
+      '強み・のびしろ分析',
+      '家庭でできる具体的な手立て',
+      '算数・国語の個別アドバイス',
+    ],
+  },
   plan_30day: {
     name: '30日プラン',
     price: '¥2,450',

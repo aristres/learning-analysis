@@ -112,7 +112,7 @@ export default async function ParentDashboard() {
               <div className="text-2xl font-bold text-[#F7941D] mb-1">¥1,480</div>
               <p className="text-xs text-gray-500 mb-3">20問・詳細レポート</p>
               <Link
-                href="/parent/assessment/basic"
+                href="/parent/payment/plan?type=basic_assessment"
                 className="block text-sm py-1.5 bg-[#F7941D] text-white rounded-lg hover:bg-[#E8850F]"
               >
                 購入する
