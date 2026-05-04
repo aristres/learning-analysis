@@ -89,7 +89,6 @@ function generateMockFreeReport(
 ) {
   const attention = answersJson.domains?.attention
   const motivation = answersJson.domains?.motivation_emotion
-  const habits = answersJson.domains?.study_habits
 
   const attLabel = attention?.level === 'high' ? '高い集中力' : attention?.level === 'low' ? '集中の持続に課題' : '平均的な集中力'
   const motLabel = motivation?.level === 'high' ? '意欲が高い' : motivation?.level === 'low' ? '意欲の引き出しに工夫が必要' : '平均的な意欲'

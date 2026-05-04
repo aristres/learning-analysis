@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { DEMO_ANSWERS_JSON, DEMO_MONTHLY_REVIEWS } from '@/lib/demo-data'
-import { generatePlan, type PlanGeneratorInput } from '@/lib/plan-generator'
+import { generatePlan } from '@/lib/plan-generator'
 import type { PlanJson, DomainKey } from '@/types'
 
 // =============================================

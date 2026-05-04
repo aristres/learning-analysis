@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -10,15 +10,9 @@ function LoginForm() {
   const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const callbackError = searchParams.get('error') === 'auth_callback_failed'
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-
-  useEffect(() => {
-    const errorParam = searchParams.get('error')
-    if (errorParam === 'auth_callback_failed') {
-      setError('メール認証に失敗しました。もう一度お試しください。')
-    }
-  }, [searchParams])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -84,8 +78,8 @@ function LoginForm() {
           />
         </div>
 
-        {error && (
-          <p className="text-red-500 text-sm">{error}</p>
+        {(error || callbackError) && (
+          <p className="text-red-500 text-sm">{error || 'メール認証に失敗しました。もう一度お試しください。'}</p>
         )}
 
         <button
