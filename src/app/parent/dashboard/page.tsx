@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import type { DbChild, DbAssessment, DbPlan } from '@/types'
+import PlanCancelButton from '@/components/PlanCancelButton'
 
 export default async function ParentDashboard() {
   const supabase = await createClient()
@@ -149,25 +150,27 @@ export default async function ParentDashboard() {
             <h3 className="text-lg font-bold text-gray-700 mb-3">📋 アクティブプラン</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {(plans as (DbPlan & { children: { name: string } | null })[]).map((p) => (
-                <Link
-                  key={p.id}
-                  href={`/parent/plan/${p.id}`}
-                  className="bg-white rounded-xl shadow-sm p-5 border hover:border-[#F7941D] transition"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="font-bold text-gray-800">
-                      {p.children?.name ?? '—'}の30日プラン
+                <div key={p.id} className="bg-white rounded-xl shadow-sm p-5 border">
+                  <Link
+                    href={`/parent/plan/${p.id}`}
+                    className="block hover:opacity-80 transition"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="font-bold text-gray-800">
+                        {p.children?.name ?? '—'}の{p.type === '30day' ? '30日' : 'マンスリー'}プラン
+                      </p>
+                      <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full">
+                        実施中
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-500">
+                      {p.start_date && new Date(p.start_date).toLocaleDateString('ja-JP')} 〜{' '}
+                      {p.end_date && new Date(p.end_date).toLocaleDateString('ja-JP')}
                     </p>
-                    <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full">
-                      実施中
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-500">
-                    {p.start_date && new Date(p.start_date).toLocaleDateString('ja-JP')} 〜{' '}
-                    {p.end_date && new Date(p.end_date).toLocaleDateString('ja-JP')}
-                  </p>
-                  <p className="text-[#F7941D] text-sm mt-2">プランを見る →</p>
-                </Link>
+                    <p className="text-[#F7941D] text-sm mt-2">プランを見る →</p>
+                  </Link>
+                  <PlanCancelButton planId={p.id} />
+                </div>
               ))}
             </div>
           </section>
