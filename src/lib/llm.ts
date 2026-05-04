@@ -75,7 +75,7 @@ export async function generateAssessmentReport(
 
   return withRetry(async () => {
     const completion = await client.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-4o-mini',
       max_tokens: 2048,
       response_format: { type: 'json_object' },
       messages: [
