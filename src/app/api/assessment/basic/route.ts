@@ -26,11 +26,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '必須パラメータが不足しています' }, { status: 400 })
     }
 
-    // basicタイプはassessmentId（支払い済み）が必須
-    if (!assessmentId) {
-      return NextResponse.json({ error: '決済が必要です' }, { status: 403 })
-    }
-
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
