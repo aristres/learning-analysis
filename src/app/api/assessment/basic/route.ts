@@ -33,7 +33,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
     }
 
-    // 支払いは不要（レポート生成は無料、閲覧時に一部ロック）
+    // アクセス資格チェック：過去の支払い済み診断 OR アクティブプランがあれば無料でフル閲覧可
+    const [{ data: paidAssessment }, { data: activePlan }] = await Promise.all([
+      supabase
+        .from('assessments')
+        .select('id')
+        .eq('parent_id', user.id)
+        .eq('payment_status', 'paid')
+        .limit(1)
+        .single(),
+      supabase
+        .from('plans')
+        .select('id')
+        .eq('parent_id', user.id)
+        .eq('status', 'active')
+        .limit(1)
+        .single(),
+    ])
+    const isQualified = !!(paidAssessment || activePlan)
+    const initialPaymentStatus = isQualified ? 'paid' : 'unpaid'
 
     // スコア計算 + v2 学習タイプ分類
     const answersJson = calcBasicAnswersJson(rawAnswers, grade)
@@ -50,7 +68,7 @@ export async function POST(request: NextRequest) {
           parent_id: user.id,
           type: 'basic',
           status: 'in_progress',
-          payment_status: 'unpaid',
+          payment_status: initialPaymentStatus,
           answers_json: answersJson,
         })
         .select('id')

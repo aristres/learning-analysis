@@ -86,7 +86,35 @@ export default async function ReportPage({
     notFound()
   }
 
-  const isPaid = assessment.payment_status === 'paid'
+  // 資格チェック：この診断が有料 OR 過去に支払い済み OR アクティブプランあり
+  const { data: { user } } = await supabase.auth.getUser()
+  const [{ data: paidAssessment }, { data: activePlan }] = await Promise.all([
+    supabase
+      .from('assessments')
+      .select('id')
+      .eq('parent_id', assessment.parent_id)
+      .eq('payment_status', 'paid')
+      .limit(1)
+      .single(),
+    supabase
+      .from('plans')
+      .select('id')
+      .eq('parent_id', assessment.parent_id)
+      .eq('status', 'active')
+      .limit(1)
+      .single(),
+  ])
+  const isQualified = assessment.payment_status === 'paid' || !!paidAssessment || !!activePlan
+
+  // 資格があるのに payment_status が unpaid なら自動で更新
+  if (isQualified && assessment.payment_status !== 'paid') {
+    await supabase
+      .from('assessments')
+      .update({ payment_status: 'paid' })
+      .eq('id', assessmentId)
+  }
+
+  const isPaid = isQualified
 
   const result = assessment.result_json as AssessmentResult | null
   const answersJson = assessment.answers_json as AnswersJson | null
