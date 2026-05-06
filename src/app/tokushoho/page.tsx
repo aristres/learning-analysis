@@ -35,7 +35,18 @@ export default function TokushohoPage() {
 
             <div className="border-b border-gray-100 pb-4">
               <h2 className="text-sm font-medium text-gray-500 mb-1">メールアドレス</h2>
-              <p className="text-gray-800">※公開時に記載</p>
+              <p className="text-gray-800">
+                <a href="mailto:sanaesuzuki16@gmail.com" className="text-[#F7941D] hover:underline">
+                  sanaesuzuki16@gmail.com
+                </a>
+              </p>
+              <p className="text-gray-500 text-sm mt-1">
+                お問い合わせは
+                <Link href="/contact" className="text-[#F7941D] hover:underline mx-1">
+                  お問い合わせフォーム
+                </Link>
+                もご利用いただけます。
+              </p>
             </div>
 
             <div className="border-b border-gray-100 pb-4">
@@ -104,9 +115,12 @@ export default function TokushohoPage() {
           </div>
         </div>
 
-        <div className="text-center mt-6 pb-8">
+        <div className="text-center mt-6 pb-8 flex justify-center gap-6">
           <Link href="/" className="text-[#F7941D] hover:underline text-sm">
             トップページへ戻る
+          </Link>
+          <Link href="/contact" className="text-gray-400 hover:text-gray-600 hover:underline text-sm">
+            お問い合わせ
           </Link>
         </div>
       </div>
