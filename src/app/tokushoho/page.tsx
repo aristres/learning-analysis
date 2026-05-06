@@ -20,7 +20,7 @@ export default function TokushohoPage() {
 
             <div className="border-b border-gray-100 pb-4">
               <h2 className="text-sm font-medium text-gray-500 mb-1">運営統括責任者</h2>
-              <p className="text-gray-800">※公開時に記載</p>
+              <p className="text-gray-800">髙橋　沙奈恵</p>
             </div>
 
             <div className="border-b border-gray-100 pb-4">

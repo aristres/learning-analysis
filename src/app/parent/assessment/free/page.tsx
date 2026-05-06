@@ -1,8 +1,51 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+
+// ── 分析中ローディング画面（ローテーションメッセージで待ち時間を体感短縮） ──
+const ANALYZING_MESSAGES = [
+  { icon: '📝', text: '回答内容を読み込んでいます...' },
+  { icon: '🧠', text: '8つの領域を分析しています...' },
+  { icon: '🔍', text: '学習スタイルのパターンを確認中...' },
+  { icon: '✨', text: 'お子さんの強みを整理しています...' },
+  { icon: '🏠', text: '家庭での手立てを考案中...' },
+  { icon: '📊', text: 'レポートを仕上げています...' },
+]
+
+function AnalyzingScreen() {
+  const [msgIndex, setMsgIndex] = useState(0)
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setMsgIndex((i) => (i + 1) % ANALYZING_MESSAGES.length)
+    }, 2500)
+    return () => clearInterval(timer)
+  }, [])
+
+  const msg = ANALYZING_MESSAGES[msgIndex]
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#F8FAFC] px-4">
+      <div className="text-5xl mb-6 animate-bounce">{msg.icon}</div>
+      <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#F7941D] border-t-transparent mb-6" />
+      <p className="text-[#1B2A4A] font-medium text-lg text-center">{msg.text}</p>
+      <p className="text-gray-400 text-sm mt-2">通常15〜30秒ほどかかります</p>
+      {/* ドット進捗 */}
+      <div className="flex gap-1.5 mt-6">
+        {ANALYZING_MESSAGES.map((_, i) => (
+          <div
+            key={i}
+            className={`w-2 h-2 rounded-full transition-all duration-500 ${
+              i === msgIndex ? 'bg-[#F7941D] scale-125' : 'bg-gray-200'
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
 
 const FREE_QUESTIONS = [
   {
@@ -184,13 +227,7 @@ export default function FreeAssessmentPage() {
 
   // ── Loading ──
   if (currentStep === TOTAL_QUESTIONS + 1) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#F8FAFC]">
-        <div className="animate-spin rounded-full h-14 w-14 border-4 border-[#F7941D] border-t-transparent mb-6" />
-        <p className="text-[#1B2A4A] font-medium text-lg">学習特性を分析しています...</p>
-        <p className="text-gray-400 text-sm mt-2">少々お待ちください</p>
-      </div>
-    )
+    return <AnalyzingScreen />
   }
 
   // ── Result ──

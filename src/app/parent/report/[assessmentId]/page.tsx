@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import type { AssessmentResult, AnswersJson, SubTag } from '@/types'
 import Link from 'next/link'
 import PaywallButton from '@/components/PaywallButton'
+import RadarChart from '@/components/RadarChart'
 
 const DOMAIN_LABELS: Record<string, string> = {
   attention: '集中のしやすさ',
@@ -93,7 +94,13 @@ export default async function ReportPage({
   // ※ 1週間お試しは診断閲覧権を付与しない
   const { data: { user } } = await supabase.auth.getUser()
   const today = new Date().toISOString().split('T')[0]
-  const [{ data: paidAssessment }, { data: activeMonthlyPlan }] = await Promise.all([
+
+  // 資格チェック3クエリ + linkedPlan を同時並列実行
+  const [
+    { data: paidAssessment },
+    { data: activeMonthlyPlan },
+    { data: linkedPlan },
+  ] = await Promise.all([
     supabase
       .from('assessments')
       .select('id')
@@ -110,15 +117,21 @@ export default async function ReportPage({
       .gte('end_date', today)
       .limit(1)
       .single(),
+    supabase
+      .from('plans')
+      .select('id')
+      .eq('assessment_id', assessmentId)
+      .single(),
   ])
   const isQualified = assessment.payment_status === 'paid' || !!paidAssessment || !!activeMonthlyPlan
 
-  // 資格があるのに payment_status が unpaid なら自動で更新
+  // 資格があるのに payment_status が unpaid なら自動で更新（バックグラウンド実行）
   if (isQualified && assessment.payment_status !== 'paid') {
-    await supabase
+    supabase
       .from('assessments')
       .update({ payment_status: 'paid' })
       .eq('id', assessmentId)
+      .then(() => {}) // await しない（レスポンスをブロックしない）
   }
 
   const isPaid = isQualified
@@ -135,13 +148,6 @@ export default async function ReportPage({
   }
 
   const child = assessment.children as { name: string; grade: string } | null
-
-  // この診断に紐づくプランがあるか確認
-  const { data: linkedPlan } = await supabase
-    .from('plans')
-    .select('id')
-    .eq('assessment_id', assessmentId)
-    .single()
 
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-4">
@@ -259,7 +265,16 @@ export default async function ReportPage({
         {/* 以下は支払い済みのみ表示 */}
         {isPaid && <>
 
-        {/* 領域別の傾向（スコア数値なし） */}
+        {/* レーダーチャート */}
+        {answersJson && (
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <h2 className="text-lg font-bold text-gray-800 mb-1">8領域の学習特性マップ</h2>
+            <p className="text-xs text-gray-400 mb-4">スコアが高いほど軸の外側に広がります</p>
+            <RadarChart domains={answersJson.domains as Record<string, { score: number; level: string }>} />
+          </div>
+        )}
+
+        {/* 領域別の傾向（バー） */}
         {answersJson && (
           <div className="bg-white rounded-xl shadow-sm p-6">
             <h2 className="text-lg font-bold text-gray-800 mb-4">領域別の傾向</h2>
@@ -392,7 +407,7 @@ export default async function ReportPage({
               href={`/parent/plan/${linkedPlan.id}`}
               className="inline-block px-8 py-3 bg-[#F7941D] text-white rounded-lg font-medium hover:bg-[#E8850F] transition"
             >
-              📋 30日プランを見る
+              📋 学習プランを見る
             </Link>
           </div>
         )}

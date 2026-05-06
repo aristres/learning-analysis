@@ -11,30 +11,32 @@ export default async function ParentDashboard() {
 
   if (!user) redirect('/login')
 
-  // 子ども一覧
-  const { data: children } = await supabase
-    .from('children')
-    .select('*')
-    .eq('parent_id', user.id)
-    .order('created_at', { ascending: true })
-
-  // 直近の診断（有料購入済みのみ表示）
-  const { data: assessments } = await supabase
-    .from('assessments')
-    .select('*, children(name)')
-    .eq('parent_id', user.id)
-    .eq('status', 'completed')
-    .eq('payment_status', 'paid')
-    .order('created_at', { ascending: false })
-    .limit(5)
-
-  // アクティブプラン
-  const { data: plans } = await supabase
-    .from('plans')
-    .select('*, children(name)')
-    .eq('parent_id', user.id)
-    .eq('status', 'active')
-    .order('created_at', { ascending: false })
+  // 3クエリを並列実行（直列→並列化で約2/3の時間短縮）
+  const [
+    { data: children },
+    { data: assessments },
+    { data: plans },
+  ] = await Promise.all([
+    supabase
+      .from('children')
+      .select('*')
+      .eq('parent_id', user.id)
+      .order('created_at', { ascending: true }),
+    supabase
+      .from('assessments')
+      .select('*, children(name)')
+      .eq('parent_id', user.id)
+      .eq('status', 'completed')
+      .eq('payment_status', 'paid')
+      .order('created_at', { ascending: false })
+      .limit(5),
+    supabase
+      .from('plans')
+      .select('*, children(name)')
+      .eq('parent_id', user.id)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false }),
+  ])
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -225,6 +227,17 @@ export default async function ParentDashboard() {
           </section>
         )}
       </main>
+
+      {/* お問い合わせフッター */}
+      <footer className="max-w-2xl mx-auto px-4 py-6 text-center">
+        <p className="text-xs text-gray-400">
+          ご不明な点・お困りのことがあれば
+          <Link href="/contact" className="text-[#F7941D] hover:underline mx-1 font-medium">
+            お問い合わせ
+          </Link>
+          からお気軽にどうぞ
+        </p>
+      </footer>
     </div>
   )
 }

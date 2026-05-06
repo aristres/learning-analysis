@@ -16,7 +16,7 @@ function LoginForm() {
   useEffect(() => {
     const errorParam = searchParams.get('error')
     if (errorParam === 'auth_callback_failed') {
-      setError('メール認証に失敗しました。もう一度お試しください。')
+      setError('メール確認リンクの処理に失敗しました。リンクの有効期限が切れている可能性があります。登録済みのメールアドレスでそのままログインをお試しください。')
     }
   }, [searchParams])
 
@@ -103,6 +103,12 @@ function LoginForm() {
           新規登録
         </Link>
       </p>
+
+      <div className="mt-6 pt-4 border-t border-gray-100 text-center">
+        <Link href="/tokushoho" className="text-xs text-gray-400 hover:underline">
+          特定商取引法に基づく表記
+        </Link>
+      </div>
     </div>
   )
 }
