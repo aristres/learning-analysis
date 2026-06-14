@@ -46,7 +46,7 @@ export const metadata: Metadata = {
       'たった3分でお子さんの学習の傾向がわかる。AI分析による個別最適化された学習プランを提案。',
   },
   verification: {
-    google: '6LtBX4BK6m2zRkq2z1-f434az8_qXL8MA-qul5PSDPM',
+    google: 'Gv6p47RkT_M2YudlWcjJao5Cr0_w4qyNWMDzPzEg-wM',
   },
   robots: {
     index: true,
