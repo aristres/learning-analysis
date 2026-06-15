@@ -11,7 +11,6 @@ export async function GET(request: NextRequest) {
   const type       = searchParams.get('type') as EmailOtpType | null
   const next       = searchParams.get('next') ?? '/parent/dashboard'
 
-  // Vercel 本番環境では x-forwarded-host を優先使用
   const forwardedHost = request.headers.get('x-forwarded-host')
   const baseUrl = forwardedHost
     ? `https://${forwardedHost}`
@@ -33,17 +32,14 @@ export async function GET(request: NextRequest) {
     }
   )
 
-  // ── パターン1: メール確認リンク（token_hash + type） ──────────────
-  // Supabase がメール確認に使う形式
   if (token_hash && type) {
     const { error } = await supabase.auth.verifyOtp({ token_hash, type })
     if (!error) {
-      return NextResponse.redirect(`${baseUrl}${next}`)
+      const redirectPath = type === 'recovery' ? '/auth/reset-password' : next
+      return NextResponse.redirect(`${baseUrl}${redirectPath}`)
     }
   }
 
-  // ── パターン2: OAuth / PKCE コード交換（code） ────────────────────
-  // Google/GitHub ログインや一部のメール確認で使われる形式
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
@@ -51,6 +47,5 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // ── どちらも失敗した場合はエラーページへ ──────────────────────────
   return NextResponse.redirect(`${baseUrl}/login?error=auth_callback_failed`)
 }
